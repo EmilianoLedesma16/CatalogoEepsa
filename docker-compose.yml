@@ -72,9 +72,16 @@ services:
       - ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN:-}
       - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
       - RUNNER_SCOPE=repo
+      # Reusar el registro tras un reinicio del contenedor/NAS. Sin esto, al reiniciar encontraba
+      # su configuración vieja ("already configured"), fallaba y quedaba en bucle de reinicios
+      # (pasó del 16-sep al 3-oct-2026: 18,681 reinicios, ningún deploy se ejecutó).
+      - CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/runner-config
+      - DISABLE_AUTOMATIC_DEREGISTRATION=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOST_PATH:-.}/:/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa
+      - runner_config:/runner-config
 
 volumes:
   postgres_data:
+  runner_config:
