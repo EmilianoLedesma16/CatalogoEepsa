@@ -8,6 +8,23 @@ import type { Product } from './CartContext';
 
 const API_URL = '/api/productos';
 
+interface CatalogCategory {
+  name: string;
+  sub: string[];
+}
+
+/** Líneas y categorías vigentes en el SINV (`GET /api/categorias`). */
+function useCatalogCategories(): CatalogCategory[] {
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  useEffect(() => {
+    fetch('/api/categorias')
+      .then(res => (res.ok ? res.json() : []))
+      .then(setCategories)
+      .catch(err => console.error('Error al cargar categorías', err));
+  }, []);
+  return categories;
+}
+
 const WhatsAppIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -131,24 +148,58 @@ function CartUI() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [quoteSuccess, setQuoteSuccess] = useState(false);
   const [quoteId, setQuoteId] = useState('');
+  const [quotePending, setQuotePending] = useState(false);
+  const [quoteMessage, setQuoteMessage] = useState('');
+  const [quoteError, setQuoteError] = useState('');
+  const [contacto, setContacto] = useState({ nombre: '', telefono: '', correo: '', empresa: '', notas: '' });
+  // Una llave por intento de envío: si la red falla y el cliente reintenta, el SINV no duplica la cotización.
+  // Cambiar el carrito o los datos genera una llave nueva (es otra solicitud).
+  const idempotencyKey = useRef<string | null>(null);
+  useEffect(() => {
+    idempotencyKey.current = null;
+  }, [cart, contacto]);
+
+  const contactError = (() => {
+    if (contacto.nombre.trim().length < 2) return 'Escribe tu nombre';
+    if (!contacto.telefono.trim() && !contacto.correo.trim()) return 'Déjanos un teléfono o un correo';
+    if (contacto.telefono.trim() && !/^\+?\d{7,15}$/.test(contacto.telefono.replace(/[^\d+]/g, ''))) return 'El teléfono no es válido';
+    if (contacto.correo.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto.correo.trim())) return 'El correo no es válido';
+    return '';
+  })();
 
   const handleGenerateQuote = async () => {
     if (cart.length === 0) return;
+    if (contactError) {
+      setQuoteError(contactError);
+      return;
+    }
+    idempotencyKey.current ??= crypto.randomUUID();
     setIsGenerating(true);
+    setQuoteError('');
     try {
       const res = await fetch('/api/cotizaciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cart })
+        body: JSON.stringify({
+          idempotencyKey: idempotencyKey.current,
+          cart: cart.map(item => ({ sku: item.sku, cantidad: item.cantidad })),
+          contacto,
+        })
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (data.success) {
-        setQuoteId(data.folio);
+        setQuoteId(data.folio ?? data.referencia);
+        setQuotePending(Boolean(data.pendiente));
+        setQuoteMessage(data.mensaje ?? '');
         setQuoteSuccess(true);
         clearCart();
+        idempotencyKey.current = null;
+      } else {
+        setQuoteError(data.error ?? 'No pudimos generar tu cotización. Intenta de nuevo.');
       }
     } catch (error) {
       console.error('Error generating quote', error);
+      setQuoteError('Sin conexión. Revisa tu internet e intenta de nuevo.');
     }
     setIsGenerating(false);
   };
@@ -159,9 +210,13 @@ function CartUI() {
       setTimeout(() => {
         setQuoteSuccess(false);
         setQuoteId('');
+        setQuotePending(false);
+        setQuoteMessage('');
       }, 300); // Resetear estado después de la animación de cierre
     }
   };
+
+  const inputClass = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/20';
 
   return (
     <AnimatePresence>
@@ -189,11 +244,16 @@ function CartUI() {
                      <CheckCircle className="w-10 h-10" /> 
                   </div>
                   <h3 className="text-2xl font-black font-heading text-brand-ink mb-2">¡Cotización Generada!</h3>
-                  <p className="text-gray-500 mb-6">Tu pedido ha sido registrado exitosamente con el siguiente folio:</p>
-                  
-                  <div className="bg-gray-50 border-2 border-dashed border-teal-200 rounded-2xl p-6 w-full mb-8">
+                  <p className="text-gray-500 mb-6">
+                    {quotePending
+                      ? 'Tu pedido quedó registrado con la siguiente referencia (en breve te asignaremos un folio):'
+                      : 'Tu pedido ha sido registrado exitosamente con el siguiente folio:'}
+                  </p>
+
+                  <div className="bg-gray-50 border-2 border-dashed border-teal-200 rounded-2xl p-6 w-full mb-4">
                      <span className="block text-3xl font-black text-teal-700 tracking-wider font-mono">{quoteId}</span>
                   </div>
+                  {quoteMessage && <p className="text-sm text-gray-500 mb-8">{quoteMessage}</p>}
 
                   <p className="text-sm font-bold text-gray-600 mb-4">Elige cómo deseas continuar con tu pedido:</p>
                   
@@ -266,10 +326,26 @@ function CartUI() {
                 <span className="font-medium text-gray-500">Total Estimado</span>
                 <div className="text-right">
                   <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">Mxn / Sin IVA</p>
+                  <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MXN · IVA incluido</p>
                 </div>
               </div>
-              
+
+              {cart.length > 0 && (
+                <div className="mb-4 grid grid-cols-2 gap-2">
+                  <p className="col-span-2 text-xs font-bold text-gray-600">¿A quién contactamos para cerrar tu pedido?</p>
+                  <input className={`${inputClass} col-span-2`} placeholder="Nombre *" autoComplete="name" value={contacto.nombre} onChange={e => setContacto({ ...contacto, nombre: e.target.value })} />
+                  <input className={inputClass} placeholder="Teléfono" type="tel" autoComplete="tel" value={contacto.telefono} onChange={e => setContacto({ ...contacto, telefono: e.target.value })} />
+                  <input className={inputClass} placeholder="Correo" type="email" autoComplete="email" value={contacto.correo} onChange={e => setContacto({ ...contacto, correo: e.target.value })} />
+                  <input className={`${inputClass} col-span-2`} placeholder="Empresa (opcional)" autoComplete="organization" value={contacto.empresa} onChange={e => setContacto({ ...contacto, empresa: e.target.value })} />
+                  <textarea className={`${inputClass} col-span-2 resize-none`} rows={2} placeholder="Comentarios (opcional)" value={contacto.notas} onChange={e => setContacto({ ...contacto, notas: e.target.value })} />
+                  <p className="col-span-2 text-[11px] text-gray-400">Teléfono o correo: al menos uno.</p>
+                </div>
+              )}
+
+              {quoteError && (
+                <p role="alert" className="mb-3 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{quoteError}</p>
+              )}
+
               <div className="flex flex-col gap-3">
                  <motion.button 
                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
@@ -439,21 +515,9 @@ function Screen2AAssistant() {
     loadInitialMessages();
   }, []);
 
-  const categoryMap: Record<string, string> = {
-    'Todos': '',
-    'Equipo Activo': 'Equipo Activo',
-    'CATV': 'CATV',
-    'Cable de Fibra Óptica': 'Cable de Fibra Óptica',
-    'Herramientas FTTH': 'Herramientas FTTH',
-    'Herrajes': 'Herrajes',
-    'Tranceptores': 'Tranceptores',
-    'Ensambles Ópticos': 'Ensambles Ópticos',
-    'Medición y Fusión': 'Medición y Fusión',
-    'Kits de Fibra Óptica': 'Kits de Fibra Óptica',
-    'Redes e IT': 'Redes e IT'
-  };
-  const categories = Object.keys(categoryMap);
-  
+  // Las líneas de producto salen del SINV: si el Administrador crea una línea nueva, Nexi la ofrece sola.
+  const categories = ['Todos', ...useCatalogCategories().map(c => c.name)];
+
   const handleCategoryClick = async (category: string) => {
     setWaitingForCategory(false);
     const userMsgId = Date.now();
@@ -464,7 +528,9 @@ function Screen2AAssistant() {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
-      const res = await fetch(`${API_URL}?tags=${categoryMap[category]}`);
+      const tags = category === 'Todos' ? '' : encodeURIComponent(category);
+      const res = await fetch(`${API_URL}?tags=${tags}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const botMsgId = Date.now() + 1;
       setMessages(prev => [...prev, { id: botMsgId, type: 'bot', text: `¡Excelente! Encontré estas opciones para "${category}".`, products: data }]);
@@ -479,7 +545,7 @@ function Screen2AAssistant() {
     addToCart(p);
     setMessages(prev => [
       ...prev,
-      { id: Date.now(), type: 'bot', text: `He agregado "${p.nombre}" a tu cotización.`, icon: 'success', productImage: p.imagen_url }
+      { id: Date.now(), type: 'bot', text: `He agregado "${p.nombre}" a tu cotización.`, icon: 'success', productImage: p.imagen_url ?? undefined }
     ]);
   };
 
@@ -667,23 +733,12 @@ function Screen2BCatalog() {
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
   const [expandedCategory, setExpandedCategory] = useState<string | null>('Equipo Activo');
 
-  const catalogCategories = [
-    { name: 'Todos', sub: [] },
-    { name: 'Equipo Activo', sub: ['OLT', 'ONU/ONT', 'Mini Nodos'] },
-    { name: 'CATV', sub: ['Transmisor', 'EDFA'] },
-    { name: 'Cable de Fibra Óptica', sub: ['ADSS', 'Mini ADSS', 'Mini Figura 8', 'Drop', 'Cable Armado'] },
-    { name: 'Herramientas FTTH', sub: ['ODF', 'Cierre de Empalme', 'Cajas de Distribución (NAP)', 'Divisores & WDM'] },
-    { name: 'Herrajes', sub: ['Preformados', 'Tipo D', 'Herraje Tipo J'] },
-    { name: 'Tranceptores', sub: ['Tranceptores Ópticos', 'Convertidores de Medios'] },
-    { name: 'Ensambles Ópticos', sub: ['Jumpers', 'Conectores mecánicos', 'Pigtails', 'Acopladores'] },
-    { name: 'Medición y Fusión', sub: [] },
-    { name: 'Kits de Fibra Óptica', sub: ['Kit de Instalación FTTX'] },
-    { name: 'Redes e IT', sub: ['Switch', 'Gateway', 'AC&AP'] }
-  ];
+  // Menú lateral = líneas y categorías del SINV (antes estaba fijo y se desfasaba del catálogo real)
+  const catalogCategories: CatalogCategory[] = [{ name: 'Todos', sub: [] }, ...useCatalogCategories()];
 
   useEffect(() => {
     fetch(API_URL)
-      .then(res => res.json())
+      .then(res => (res.ok ? res.json() : []))
       .then(data => {
         setProducts(data);
         setLoading(false);
@@ -695,23 +750,16 @@ function Screen2BCatalog() {
   }, []);
 
   const filtered = products.filter(p => {
-    const matchesSearch = p.nombre.toLowerCase().includes(search.toLowerCase()) || p.descripcion.toLowerCase().includes(search.toLowerCase());
-    
+    const term = search.toLowerCase();
+    const matchesSearch = p.nombre.toLowerCase().includes(term) || p.descripcion.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term);
+
     if (selectedCategory === 'Todos') return matchesSearch;
 
-    // Normalizar etiquetas para comparación flexible
-    const tags = Array.isArray(p.etiquetas) ? p.etiquetas.map((t: string) => t.toLowerCase().trim()) : [];
-    
-    // Check main category match
-    const matchesMain = tags.includes(selectedCategory.toLowerCase()) || 
-                        (selectedCategory === 'Cable de Fibra Óptica' && tags.includes('cable de fira optica')) ||
-                        (selectedCategory === 'Ensambles Ópticos' && tags.includes('ensambles opticos'));
-
-    if (selectedSubCategory) {
-      return matchesSearch && matchesMain && tags.includes(selectedSubCategory.toLowerCase());
-    }
-
-    return matchesSearch && matchesMain;
+    // etiquetas = [línea, categoría] del SINV
+    const [line, sub] = p.etiquetas;
+    if (line !== selectedCategory) return false;
+    if (selectedSubCategory && sub !== selectedSubCategory) return false;
+    return matchesSearch;
   });
 
   return (
@@ -838,6 +886,11 @@ function Screen2BCatalog() {
                            <div className="p-6 flex-1 flex flex-col pb-0">
                               <h3 className="font-bold font-heading text-brand-ink mb-2 text-[17px] leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
                               <p className="text-[13px] font-medium text-gray-400 mb-3 line-clamp-2">{p.descripcion}</p>
+                              {p.en_stock !== undefined && (
+                                <span className={`self-start mb-2 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${p.en_stock ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                                  {p.en_stock ? 'En existencia' : 'Sobre pedido'}
+                                </span>
+                              )}
                               <div className="text-xl font-black text-teal-600 mb-4">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></div>
                            </div>
                         </div>

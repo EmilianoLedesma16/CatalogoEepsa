@@ -1,14 +1,18 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
+/** Producto tal como lo entrega el backend del catálogo (datos del SINV). `id` = SKU. */
 export interface Product {
-  id: number;
+  id: string;
   sku: string;
   nombre: string;
   descripcion: string;
+  /** MXN, IVA incluido. */
   precio_estimado: number | null;
-  imagen_url: string;
+  imagen_url: string | null;
   etiquetas: string[];
+  disponible?: number;
+  en_stock?: boolean;
   optic_times_id?: string;
 }
 
@@ -19,8 +23,8 @@ interface CartItem extends Product {
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, cantidad: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, cantidad: number) => void;
   totalEstimado: number;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
@@ -44,11 +48,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: string) => {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId: number, cantidad: number) => {
+  const updateQuantity = (productId: string, cantidad: number) => {
     if (cantidad < 1) return;
     setCart(prev => prev.map(item => item.id === productId ? { ...item, cantidad } : item));
   };
