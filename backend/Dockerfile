@@ -12,5 +12,5 @@ COPY . .
 # Exponer el puerto
 EXPOSE 3001
 
-# Comando para desarrollo
-CMD ["npm", "run", "dev"]
+# Sin modo watch: en el NAS el código sólo cambia al reconstruir la imagen
+CMD ["npm", "run", "serve"]

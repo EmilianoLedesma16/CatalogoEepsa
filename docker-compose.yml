@@ -23,6 +23,13 @@ services:
     environment:
       - DATABASE_URL=postgres://eepsa_user:eepsa_password@db:5432/eepsa_catalog
       - PORT=3001
+      # SINV = fuente única de productos, precios y stock. Llaves por canal seguro, nunca en git.
+      # Local: SINV_BASE_URL=http://host.docker.internal:3000 (SINV corriendo en tu máquina)
+      - SINV_BASE_URL=${SINV_BASE_URL:-}
+      - SINV_API_KEY=${SINV_API_KEY:-}
+      - SINV_HMAC_SECRET=${SINV_HMAC_SECRET:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${HOST_PATH:-.}/assets/img:/app/public/img
     depends_on:
@@ -59,7 +66,12 @@ services:
     environment:
       - REPO_URL=${GITHUB_REPO_URL}
       - RUNNER_NAME=synology-nas-runner
-      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+      # Preferir ACCESS_TOKEN (PAT con permiso de administración del repo): el runner pide un
+      # token de registro nuevo en cada arranque. El RUNNER_TOKEN caduca en 1 hora, así que tras
+      # reiniciar el NAS/contenedor el runner no vuelve a registrarse y los deploys se quedan en cola.
+      - ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN:-}
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN:-}
+      - RUNNER_SCOPE=repo
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOST_PATH:-.}/:/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa

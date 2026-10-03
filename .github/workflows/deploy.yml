@@ -4,33 +4,66 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: {}
+
+# Nunca dos despliegues a la vez sobre el mismo NAS
+concurrency:
+  group: deploy-nas
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: self-hosted
-    
+    timeout-minutes: 20
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          # El workspace del runner ES la carpeta del proyecto en el NAS. Con el `clean` por
+          # defecto (git clean -ffdx) se borraban los archivos ignorados del host: .env (tokens
+          # de Cloudflare y del runner) y cualquier imagen no versionada.
+          clean: false
 
       - name: Deploy with Docker Compose
+        env:
+          # Llaves del SINV: GitHub → Settings → Secrets and variables → Actions.
+          # Vacías = el backend arranca pero el catálogo no podrá consultar al SINV.
+          SINV_BASE_URL: ${{ secrets.SINV_BASE_URL }}
+          SINV_API_KEY: ${{ secrets.SINV_API_KEY }}
+          SINV_HMAC_SECRET: ${{ secrets.SINV_HMAC_SECRET }}
         run: |
-          # 1. Obtener el nombre del proyecto exacto de Synology
+          set -eu
+          # 1. Nombre del proyecto con el que Synology creó los contenedores
           PROJECT_NAME=$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.project" }}' eepsa-db)
           echo "Deploying to project: $PROJECT_NAME"
-          
-          # 2. Descubrir la ruta absoluta real del Synology (ej. /volume1/docker/CatalogoEepsa)
-          RUNNER_MOUNT=$(docker inspect -f '{{ range .Mounts }}{{ if eq .Destination "/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa" }}{{ .Source }}{{ end }}{{ end }}' eepsa-github-runner)
-          HOST_DIR=$RUNNER_MOUNT
-          echo "Host project dir: $HOST_DIR"
-          
-          # 3. Forzar a docker-compose a usar la ruta absoluta del host para los volúmenes
-          export HOST_PATH=$HOST_DIR
-          
-          docker-compose -p $PROJECT_NAME up -d --build frontend backend
-          
-          # 4. Copiar las imágenes a través de Docker hacia el volumen del host
-          docker cp assets/img/. eepsa-backend:/app/public/img/
-          
-          # Ejecutar actualizacion de rutas de imagenes
-          docker exec -i eepsa-db psql -U eepsa_user -d eepsa_catalog < db/update_prod.sql || true
+
+          # 2. Ruta real del proyecto en el host (ej. /volume1/docker/CatalogoEepsa): el runner
+          #    habla con el Docker del NAS, así que los volúmenes deben usar rutas del host
+          HOST_PATH=$(docker inspect -f '{{ range .Mounts }}{{ if eq .Destination "/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa" }}{{ .Source }}{{ end }}{{ end }}' eepsa-github-runner)
+          if [ -z "$HOST_PATH" ]; then echo "::error::No se encontró la carpeta del proyecto montada en el runner"; exit 1; fi
+          export HOST_PATH
+          echo "Host project dir: $HOST_PATH"
+
+          if [ -z "${SINV_BASE_URL}" ]; then echo "::warning::SINV_BASE_URL vacío: el catálogo no estará conectado al SINV"; fi
+
+          # 3. Sólo frontend y backend (no se tocan db, cloudflared ni el propio runner)
+          docker-compose -p "$PROJECT_NAME" up -d --build --no-deps frontend backend
+
+          # 4. Imágenes heredadas (las vigentes las sirve el SINV)
+          docker cp assets/img/. eepsa-backend:/app/public/img/ || true
+          docker image prune -f >/dev/null || true
+
+      - name: Verify
+        run: |
+          # El backend debe quedar arriba; si el SINV no responde sólo se avisa (el catálogo sirve caché/cola)
+          for i in $(seq 1 30); do
+            if docker exec eepsa-backend wget -qO- http://localhost:3001/api/health > /tmp/health.json 2>/dev/null; then
+              echo "Health OK: $(cat /tmp/health.json)"; exit 0
+            fi
+            STATE=$(docker inspect -f '{{ .State.Status }}' eepsa-backend)
+            if [ "$STATE" != "running" ]; then docker logs --tail 50 eepsa-backend; echo "::error::eepsa-backend no está corriendo"; exit 1; fi
+            sleep 3
+          done
+          docker exec eepsa-backend wget -S -qO- http://localhost:3001/api/health 2>&1 | head -20 || true
+          echo "::warning::El backend responde pero el SINV no (o la ruta /api/health aún no existe en esta versión)"
