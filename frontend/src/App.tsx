@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck } from 'lucide-react';
+import { Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, MessageSquare, List, ShieldCheck, Headset, Truck, Award, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -89,61 +89,150 @@ function TypingIndicator() {
   );
 }
 
+/** Sobre sólido (como `fa-envelope` del sitio principal). */
+const EnvelopeIcon = ({ className = 'w-4 h-4' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" />
+  </svg>
+);
+
+// Nav copiado del sitio principal (repo eepsa3, next-app/src/components/Header.tsx y MobileMenu.tsx),
+// en Tailwind, más el botón del carrito de cotización.
+const NAV_EEPSA = [
+  { href: 'https://www.eepsa.com.mx/', label: 'Inicio' },
+  { href: 'https://www.eepsa.com.mx/Servicios', label: 'Servicios' },
+  { href: 'https://www.eepsa.com.mx/Nosotros', label: 'Nosotros' },
+  { href: 'https://www.eepsa.com.mx/Contacto', label: 'Contacto' },
+];
+
 function GlobalNavbar() {
   const { cart, setIsCartOpen } = useCart();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
-  
+
   const showCart = location.pathname !== '/';
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  const desktopLink =
+    "relative inline-block px-0.5 py-2 text-[1.1rem] font-medium leading-[1.2] text-[#343a40] transition-colors hover:text-[#1a5952] after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-[#1a5952] after:transition-all after:duration-300 after:content-[''] hover:after:w-full";
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 px-4 py-3 sm:px-6 shadow-sm w-full">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
-        <a href="https://eepsa.com.mx/" target="_blank" rel="noopener noreferrer" className="shrink-0 transition-transform hover:scale-105 z-10">
-          <img src="/LogoEepsaVectorizado.png" alt="EEPSA" className="h-8 sm:h-10 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
-        </a>
+    <>
+      <header className="sticky top-0 z-40 w-full bg-white/95 py-3 font-[Arial,sans-serif] leading-[1.6] text-[#333] shadow-[0_2px_20px_rgba(0,0,0,0.1)] backdrop-blur-[10px]">
+        <div className="mx-auto flex w-[90%] max-w-[1200px] items-center justify-between gap-5 px-[15px]">
+          <a href="https://www.eepsa.com.mx/" className="flex shrink-0 items-center" aria-label="Ir al inicio">
+            <img src="/EPSA.png" alt="EEPSA" width={200} height={75} className="block h-auto w-[155px] object-contain" />
+          </a>
 
-        <div className="flex items-center gap-4 sm:gap-6 ml-auto z-10 bg-white/50 pl-2 rounded-xl">
-          {/* Contactos (Teléfono y Correo apilados, como en la imagen) */}
-          <div className="hidden md:flex flex-col items-end gap-1.5 text-[13px] font-medium text-gray-700 pr-2">
-            <a href="tel:5579916042" className="flex items-center gap-2 hover:text-teal-700 transition-colors leading-none">
-              <Phone className="w-3.5 h-3.5 text-gray-500 fill-gray-500" /> <span>(55) 79916042</span>
-            </a>
-            <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-2 hover:text-teal-700 transition-colors leading-none">
-              <Mail className="w-3.5 h-3.5 text-gray-500 fill-gray-500" /> <span>contacto@eepsa.com.mx</span>
-            </a>
+          <nav className="hidden min-[993px]:block" aria-label="Navegación principal">
+            <ul className="flex list-none gap-[30px]">
+              {NAV_EEPSA.map(({ href, label }) => (
+                <li key={href}>
+                  <a href={href} className={desktopLink}>{label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden flex-col gap-1 text-[0.8rem] min-[993px]:flex">
+              <a
+                href="https://wa.me/525543241575?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20informaci%C3%B3n%20sobre%20sus%20servicios."
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Contactar a EEPSA por WhatsApp"
+                className="flex items-center gap-1.5 text-[#343a40] transition-colors hover:text-[#1a5952]"
+              >
+                <span className="flex w-4 justify-center" aria-hidden="true"><WhatsAppIcon className="h-[0.8rem] w-[0.8rem]" /></span>
+                <span>(52) 5543241575</span>
+              </a>
+              <a href="mailto:contacto@eepsa.com.mx" aria-label="Enviar correo electrónico a EEPSA" className="flex items-center gap-1.5 text-[#343a40] transition-colors hover:text-[#1a5952]">
+                <span className="flex w-4 justify-center" aria-hidden="true"><EnvelopeIcon className="h-[0.8rem] w-[0.8rem]" /></span>
+                <span>contacto@eepsa.com.mx</span>
+              </a>
+            </div>
+
+            {showCart && (
+              <motion.button
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => setIsCartOpen(true)}
+                aria-label="Ver mi cotización"
+                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 transition-colors hover:bg-teal-100"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <AnimatePresence>
+                  {cartCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-teal-600 text-[10px] font-bold text-white"
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            )}
+
+            <button
+              type="button"
+              className="p-2 text-[#343a40] min-[993px]:hidden"
+              aria-label="Abrir menú de navegación"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
-
-          <div className="flex md:hidden flex-col items-end gap-1 text-[11px] font-medium text-gray-600">
-            <a href="tel:5579916042" className="flex items-center gap-1 hover:text-teal-700"><Phone className="w-3 h-3 fill-gray-500" /></a>
-            <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-1 hover:text-teal-700"><Mail className="w-3 h-3 fill-gray-500" /></a>
-          </div>
-
-          {showCart && (
-             <>
-                <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsCartOpen(true)}
-                  className="relative flex items-center justify-center w-11 h-11 rounded-full bg-teal-50 text-teal-700 transition-colors hover:bg-teal-100"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  <AnimatePresence>
-                    {cartCount > 0 && (
-                      <motion.span 
-                        initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                        className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-teal-600 text-white text-[10px] font-bold rounded-full border-2 border-white"
-                      >
-                        {cartCount}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-             </>
-          )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Menú móvil */}
+      <div
+        className={`fixed inset-0 z-[60] bg-black/50 transition-all duration-300 ${menuOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+      <aside
+        id="mobile-menu"
+        aria-label="Menú de navegación móvil"
+        className={`fixed top-0 z-[61] flex h-dvh font-[Arial,sans-serif] leading-[1.6] w-[300px] flex-col gap-6 overflow-y-auto bg-white px-5 py-6 transition-[right] duration-300 ease-in-out ${menuOpen ? 'right-0' : '-right-[320px]'}`}
+      >
+        <div className="flex items-center justify-between">
+          <a href="https://www.eepsa.com.mx/" className="flex items-center">
+            <img src="/EPSA.png" alt="EEPSA" width={120} height={45} className="h-auto w-[120px]" />
+          </a>
+          <button className="p-2 text-[#343a40]" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}>
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <nav aria-label="Menú móvil">
+          <ul className="flex flex-col gap-1">
+            {NAV_EEPSA.map(({ href, label }) => (
+              <li key={href}>
+                <a href={href} className="block rounded-[10px] px-4 py-3 font-medium text-[#343a40] transition-all hover:bg-[rgba(57,150,142,0.08)] hover:text-[#1a5952]">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-auto flex flex-col gap-3 border-t border-[#eee] pt-5">
+          <a href="tel:+525558398082" className="flex items-center gap-2.5 text-[0.9rem] text-[#6c757d]">
+            <Phone className="h-4 w-4 text-[#1a5952]" /> (55) 5839 8082
+          </a>
+          <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-2.5 text-[0.9rem] text-[#6c757d]">
+            <EnvelopeIcon className="h-[0.9rem] w-[0.9rem] text-[#1a5952]" /> contacto@eepsa.com.mx
+          </a>
+        </div>
+      </aside>
+    </>
   );
 }
 
@@ -415,52 +504,159 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
 // --- SCREENS ---
 function Screen1Selection() {
   const navigate = useNavigate();
+  const categories = useCatalogCategories();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => (res.ok ? res.json() : []))
+      .then(setProducts)
+      .catch(err => console.error('Error al cargar productos', err));
+  }, []);
+
+  const goCatalog = (params: Record<string, string> = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    navigate(qs ? `/catalog?${qs}` : '/catalog');
+  };
+
+  // Líneas del SINV con su conteo real y la foto de un producto de esa línea
+  const lines = categories
+    .map(c => {
+      const items = products.filter(p => p.etiquetas[0] === c.name);
+      // Disponible = al menos un producto de la línea con existencia (disponible >= 1) en el SINV
+      const inStock = items.some(p => (p.disponible ?? 0) >= 1);
+      return { ...c, count: items.length, inStock, image: items.find(p => p.imagen_url)?.imagen_url ?? null };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  const paths = [
+    {
+      eyebrow: 'Diagnóstico asistido',
+      title: 'Asesoría Técnica con Nexi',
+      desc: 'Nuestro asistente técnico te guía paso a paso hasta el producto ideal según tu topología (FTTH, DWDM, Backhaul) y tu presupuesto.',
+      cta: 'Iniciar consulta guiada',
+      icon: Bot,
+      cornerIcon: MessageSquare,
+      onClick: () => navigate('/assistant'),
+    },
+    {
+      eyebrow: 'Inventario en línea',
+      title: 'Explorar Catálogo Completo',
+      desc: 'Consulta disponibilidad en tiempo real, compara especificaciones, abre fichas técnicas y arma tu cotización al instante.',
+      cta: 'Ver todos los productos',
+      icon: LayoutGrid,
+      cornerIcon: List,
+      onClick: () => goCatalog(),
+    },
+  ];
+
+  const perks = [
+    { icon: ShieldCheck, title: 'Garantía oficial eepsa', desc: 'Respaldo directo de fábrica' },
+    { icon: Headset, title: 'Soporte especializado', desc: 'Ingenieros certificados en fibra' },
+    { icon: Truck, title: 'Envíos inmediatos', desc: 'Distribución nacional en México' },
+    { icon: Award, title: 'Certificación ITU-T', desc: 'Normativas G.652, G.657 y TIA' },
+  ];
+
   return (
-    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="min-h-screen nexi-bg flex flex-col items-center justify-center p-6">
-      <div className="max-w-4xl w-full">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-brand-ink mb-5 font-heading tracking-tight leading-tight mt-8">
-            Catálogo Interactivo de <br className="hidden md:block"/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Equipamiento Óptico</span>
-          </h1>
-          <p className="text-lg font-medium text-gray-500 max-w-2xl mx-auto">Explora nuestras soluciones y herramientas para redes de fibra óptica. Selecciona tu método de navegación preferido.</p>
-        </div>
+    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 bg-[#F7F9FB]">
+      {/* HERO */}
+      <section className="px-4 sm:px-6 pt-12 md:pt-16 pb-14">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl md:text-5xl font-bold text-brand-ink font-heading tracking-tight leading-tight">
+              Catálogo de <span className="text-teal-600">Equipamiento Óptico</span>
+            </h1>
+            <p className="mt-5 text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Elige la forma más ágil de encontrar el equipo, consumible o solución de telecomunicaciones que requiere tu proyecto de red e infraestructura crítica.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
-          <motion.div 
-            whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/assistant')} 
-            className="bg-white/80 backdrop-blur-xl border-2 border-white shadow-xl hover:shadow-[0_20px_40px_-15px_rgba(20,184,166,0.3)] hover:border-teal-400 rounded-[2rem] p-8 md:p-10 cursor-pointer group transition-all duration-300 relative overflow-hidden"
-          >
-            {/* Gradiente sutil que aparece en hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6 group-hover:ring-4 ring-teal-500/30 transition-all shadow-sm overflow-hidden border border-gray-100 group-hover:border-teal-200">
-                <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
-              </div>
-              <h2 className="text-2xl font-bold mb-3 text-brand-ink font-heading group-hover:text-teal-700 transition-colors">Asesoría con Nexi</h2>
-              <p className="text-sm font-medium text-gray-500 leading-relaxed group-hover:text-gray-700 transition-colors">No estoy seguro de qué necesito. Deja que nuestro asistente virtual te guíe paso a paso para encontrar el producto ideal.</p>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/catalog')} 
-            className="bg-white/80 backdrop-blur-xl border-2 border-white shadow-xl hover:shadow-[0_20px_40px_-15px_rgba(20,184,166,0.3)] hover:border-teal-400 rounded-[2rem] p-8 md:p-10 cursor-pointer group transition-all duration-300 relative overflow-hidden"
-          >
-            {/* Gradiente sutil que aparece en hover */}
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            <div className="relative z-10">
-              <div className="w-20 h-20 bg-gray-50 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:ring-4 ring-teal-500/30 transition-all shadow-sm border border-gray-100 group-hover:border-teal-200">
-                <Grid className="w-8 h-8 text-teal-600 group-hover:text-teal-500 transition-colors" />
-              </div>
-              <h2 className="text-2xl font-bold mb-3 text-brand-ink font-heading group-hover:text-teal-700 transition-colors">Explorar Catálogo</h2>
-              <p className="text-sm font-medium text-gray-500 leading-relaxed group-hover:text-gray-700 transition-colors">Sé lo que busco. Visualiza todo nuestro inventario, filtra productos y arma tu propia cotización directa.</p>
-            </div>
-          </motion.div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {paths.map(p => (
+              <button
+                key={p.title}
+                onClick={p.onClick}
+                className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 flex flex-col"
+              >
+                <div className="w-12 h-12 mb-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center">
+                  <p.icon className="w-6 h-6 text-teal-700" />
+                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">{p.eyebrow}</span>
+                <h2 className="mt-1.5 text-xl font-semibold text-brand-ink font-heading">{p.title}</h2>
+                <p className="mt-3 text-sm text-gray-600 leading-relaxed flex-1">{p.desc}</p>
+                <div className="w-full mt-8 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700">
+                    {p.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <span className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center">
+                    <p.cornerIcon className="w-4 h-4 text-teal-600" />
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* CATEGORÍAS */}
+      {lines.length > 0 && (
+        <section className="px-4 sm:px-6 pb-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Líneas de producto</span>
+                <h2 className="mt-1 text-2xl md:text-3xl font-bold text-brand-ink font-heading">Categorías principales</h2>
+              </div>
+              <button onClick={() => goCatalog()} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-600">
+                Explorar todo el catálogo <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {lines.slice(0, 4).map(l => (
+                <button
+                  key={l.name}
+                  onClick={() => goCatalog({ cat: l.name })}
+                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
+                  <div className="relative w-full h-36 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">
+                    {l.image
+                      ? <img src={l.image} alt={l.name} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                      : <LayoutGrid className="w-10 h-10 text-gray-300" />}
+                    <span className={`absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${l.inStock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${l.inStock ? 'bg-teal-600' : 'bg-gray-400'}`} />
+                      {l.inStock ? 'Disponible' : 'No disponible'}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-brand-ink font-heading">{l.name}</h3>
+                  <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+                    {l.sub.length ? l.sub.join(', ') : 'Consulta los productos disponibles de esta línea.'}
+                  </p>
+                  <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
+                    Ver equipos <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* BENEFICIOS */}
+      <section className="bg-[#EEF2F6] px-4 sm:px-6 py-8">
+        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {perks.map(p => (
+            <div key={p.title} className="flex items-center gap-3 bg-white rounded-xl border border-gray-200/80 px-4 py-3.5">
+              <div className="w-9 h-9 shrink-0 rounded-lg bg-teal-50 flex items-center justify-center">
+                <p.icon className="w-4 h-4 text-teal-700" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-brand-ink">{p.title}</p>
+                <p className="text-xs text-gray-500">{p.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </motion.div>
   );
 }
@@ -731,11 +927,13 @@ function Screen2BCatalog() {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [search, setSearch] = useState('');
+  // Filtros iniciales desde la URL (los manda el buscador/categorías de la pantalla de inicio)
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('q') ?? '');
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>('Equipo Activo');
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('cat') ?? 'Todos');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(searchParams.get('sub'));
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(searchParams.get('cat') ?? 'Equipo Activo');
 
   // Menú lateral = líneas y categorías del SINV (antes estaba fijo y se desfasaba del catálogo real)
   const catalogCategories: CatalogCategory[] = [{ name: 'Todos', sub: [] }, ...useCatalogCategories()];
@@ -944,6 +1142,66 @@ function Screen2BCatalog() {
   );
 }
 
+// Footer copiado del sitio principal (repo eepsa3, next-app/src/components/Footer.tsx), en Tailwind.
+const SITIO_EEPSA = 'https://www.eepsa.com.mx';
+
+function GlobalFooter() {
+  const year = new Date().getFullYear();
+  const linkClass = 'text-[0.9rem] text-white/65 transition-colors hover:text-[#1a5952]';
+
+  return (
+    <footer className="mt-10 bg-[#343a40] pb-[30px] pt-[60px] text-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-10 grid grid-cols-1 gap-7 min-[601px]:grid-cols-2 min-[901px]:grid-cols-[2fr_1fr_1fr_1.5fr] min-[901px]:gap-10">
+          <div>
+            <img src="/EPSA.png" alt="EEPSA" width={140} height={50} className="mb-4 h-auto max-w-[140px]" />
+            <p className="mb-4 text-[0.9rem] leading-[1.7] text-white/65">
+              Optimizamos infraestructura y soluciones tecnológicas avanzadas para impulsar el éxito de tu negocio.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="mb-3.5 text-[0.95rem] font-bold text-white/80">Servicios</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><a className={linkClass} href={`${SITIO_EEPSA}/Servicios#instalaciones-electricas`}>Instalación Eléctrica</a></li>
+              <li><a className={linkClass} href={`${SITIO_EEPSA}/Servicios#sistemas-mecanicos`}>Sistemas Mecánicos</a></li>
+              <li><a className={linkClass} href={`${SITIO_EEPSA}/Servicios#proyectos-ingenieria`}>Proyectos de Ingeniería</a></li>
+              <li><a className={linkClass} href={`${SITIO_EEPSA}/Servicios#mantenimiento-industrial`}>Mantenimiento Industrial</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-3.5 text-[0.95rem] font-bold text-white/80">Compañía</h4>
+            <ul className="flex flex-col gap-2.5">
+              <li><a className={linkClass} href={`${SITIO_EEPSA}/Nosotros`}>Quiénes Somos</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-3.5 text-[0.95rem] font-bold text-white/80">Contacto</h4>
+            <a href="https://maps.app.goo.gl/jivwPy1VbwrSibpg7" target="_blank" rel="noopener noreferrer" className="group">
+              <p className="mb-2.5 flex items-start gap-2.5 text-[0.88rem] text-white/65 transition-colors group-hover:text-[#1a5952]">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#1a5952]" aria-hidden="true" />
+                DONIZETTI 217 COL. VALLEJO, Ciudad de México, México
+              </p>
+            </a>
+            <a href="https://wa.me/525543241575" target="_blank" rel="noopener noreferrer" aria-label="Contactar a EEPSA por WhatsApp" className="group">
+              <p className="mb-2.5 flex items-start gap-2.5 text-[0.88rem] text-white/65 transition-colors group-hover:text-[#1a5952]">
+                <WhatsAppIcon className="mt-0.5 h-4 w-4 shrink-0 fill-[#1a5952]" />
+                (52) 5543241575
+              </p>
+            </a>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 pt-6 text-center text-[0.85rem] text-white/50">
+          <p>&copy; {year} EEPSA. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 function App() {
   return (
     <CartProvider>
@@ -958,6 +1216,7 @@ function App() {
             </Routes>
           </AnimatePresence>
         </main>
+        <GlobalFooter />
       </div>
       <CartUI />
     </CartProvider>
