@@ -8,6 +8,10 @@ import type { Product } from './CartContext';
 
 const API_URL = '/api/productos';
 
+/** Nombre de contacto: sólo letras (acentos, ñ, ü) separadas por un espacio; mínimo 3 letras. */
+const NOMBRE_RE = /^(?=.{3,80}$)[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+const NOMBRE_INVALIDO = /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g;
+
 interface CatalogCategory {
   name: string;
   sub: string[];
@@ -151,7 +155,7 @@ function CartUI() {
   const [quotePending, setQuotePending] = useState(false);
   const [quoteMessage, setQuoteMessage] = useState('');
   const [quoteError, setQuoteError] = useState('');
-  const [contacto, setContacto] = useState({ nombre: '', telefono: '', correo: '', empresa: '', notas: '' });
+  const [contacto, setContacto] = useState({ nombre: '', telefono: '', correo: '' });
   // Una llave por intento de envío: si la red falla y el cliente reintenta, el SINV no duplica la cotización.
   // Cambiar el carrito o los datos genera una llave nueva (es otra solicitud).
   const idempotencyKey = useRef<string | null>(null);
@@ -159,13 +163,12 @@ function CartUI() {
     idempotencyKey.current = null;
   }, [cart, contacto]);
 
-  const contactError = (() => {
-    if (contacto.nombre.trim().length < 2) return 'Escribe tu nombre';
-    if (!contacto.telefono.trim() && !contacto.correo.trim()) return 'Déjanos un teléfono o un correo';
-    if (contacto.telefono.trim() && !/^\+?\d{7,15}$/.test(contacto.telefono.replace(/[^\d+]/g, ''))) return 'El teléfono no es válido';
-    if (contacto.correo.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto.correo.trim())) return 'El correo no es válido';
-    return '';
-  })();
+  // Nombre: sólo letras (con acentos y ñ) y espacios. Teléfono: 10 dígitos. Correo: opcional.
+  const nombreError = !NOMBRE_RE.test(contacto.nombre.trim()) ? 'Escribe tu nombre (sólo letras)' : '';
+  const telefonoError = !/^\d{10}$/.test(contacto.telefono) ? 'El teléfono debe tener 10 dígitos' : '';
+  const correoError =
+    contacto.correo.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto.correo.trim()) ? 'El correo no es válido' : '';
+  const contactError = nombreError || telefonoError || correoError;
 
   const handleGenerateQuote = async () => {
     if (cart.length === 0) return;
@@ -333,12 +336,13 @@ function CartUI() {
               {cart.length > 0 && (
                 <div className="mb-4 grid grid-cols-2 gap-2">
                   <p className="col-span-2 text-xs font-bold text-gray-600">¿A quién contactamos para cerrar tu pedido?</p>
-                  <input className={`${inputClass} col-span-2`} placeholder="Nombre *" autoComplete="name" value={contacto.nombre} onChange={e => setContacto({ ...contacto, nombre: e.target.value })} />
-                  <input className={inputClass} placeholder="Teléfono" type="tel" autoComplete="tel" value={contacto.telefono} onChange={e => setContacto({ ...contacto, telefono: e.target.value })} />
-                  <input className={inputClass} placeholder="Correo" type="email" autoComplete="email" value={contacto.correo} onChange={e => setContacto({ ...contacto, correo: e.target.value })} />
-                  <input className={`${inputClass} col-span-2`} placeholder="Empresa (opcional)" autoComplete="organization" value={contacto.empresa} onChange={e => setContacto({ ...contacto, empresa: e.target.value })} />
-                  <textarea className={`${inputClass} col-span-2 resize-none`} rows={2} placeholder="Comentarios (opcional)" value={contacto.notas} onChange={e => setContacto({ ...contacto, notas: e.target.value })} />
-                  <p className="col-span-2 text-[11px] text-gray-400">Teléfono o correo: al menos uno.</p>
+                  <input className={`${inputClass} col-span-2`} placeholder="Nombre *" autoComplete="name" maxLength={80} value={contacto.nombre} onChange={e => setContacto({ ...contacto, nombre: e.target.value.replace(NOMBRE_INVALIDO, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '') })} />
+                  {contacto.nombre && nombreError && <p className="col-span-2 -mt-1 text-[11px] font-semibold text-red-500">{nombreError}</p>}
+                  <input className={inputClass} placeholder="Teléfono *" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={contacto.telefono} onChange={e => setContacto({ ...contacto, telefono: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
+                  <input className={inputClass} placeholder="Correo (opcional)" type="email" autoComplete="email" maxLength={160} value={contacto.correo} onChange={e => setContacto({ ...contacto, correo: e.target.value.trim() })} />
+                  {contacto.telefono && telefonoError && <p className="col-span-2 -mt-1 text-[11px] font-semibold text-red-500">{telefonoError}</p>}
+                  {correoError && <p className="col-span-2 -mt-1 text-[11px] font-semibold text-red-500">{correoError}</p>}
+                  <p className="col-span-2 text-[11px] text-gray-400">* Nombre y teléfono son obligatorios.</p>
                 </div>
               )}
 
@@ -350,7 +354,7 @@ function CartUI() {
                  <motion.button 
                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
                    onClick={handleGenerateQuote}
-                   disabled={isGenerating || cart.length === 0}
+                   disabled={isGenerating || cart.length === 0 || Boolean(contactError)}
                    className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-600/30 transition-colors"
                  >
                     {isGenerating ? 'Generando...' : 'Generar Cotización'}

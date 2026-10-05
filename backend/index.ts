@@ -193,7 +193,8 @@ interface SinvQuotationPayload {
 }
 
 const IDEMPOTENCY_KEY = /^[A-Za-z0-9._:-]{8,120}$/;
-const PHONE = /^\+?\d{7,15}$/;
+const PHONE = /^\d{10}$/;
+const NOMBRE = /^(?=.{3,80}$)[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
@@ -215,14 +216,12 @@ function buildPayload(body: unknown, key: string): { payload?: SinvQuotationPayl
   }
 
   const c = b.contacto ?? {};
-  const name = clean(c.nombre, 160);
-  const phone = clean(c.telefono, 30).replace(/[^\d+]/g, '');
+  // Nombre y teléfono obligatorios; correo opcional (mismas reglas que el formulario).
+  const name = clean(c.nombre, 160).replace(/\s+/g, ' ');
+  const phone = clean(c.telefono, 30).replace(/\D/g, '');
   const email = clean(c.correo, 160).toLowerCase();
-  const company = clean(c.empresa, 250);
-  const notes = clean(c.notas, 2000);
-  if (name.length < 2) return { error: 'Escribe tu nombre' };
-  if (!phone && !email) return { error: 'Déjanos un teléfono o un correo para contactarte' };
-  if (phone && !PHONE.test(phone)) return { error: 'El teléfono no es válido' };
+  if (!NOMBRE.test(name)) return { error: 'Escribe tu nombre (sólo letras)' };
+  if (!PHONE.test(phone)) return { error: 'El teléfono debe tener 10 dígitos' };
   if (email && !EMAIL.test(email)) return { error: 'El correo no es válido' };
 
   return {
@@ -230,12 +229,10 @@ function buildPayload(body: unknown, key: string): { payload?: SinvQuotationPayl
       externalId: `CAT-${key.replace(/[^A-Za-z0-9]/g, '').slice(0, 12).toUpperCase()}`,
       customer: {
         name,
-        ...(phone && { phone }),
+        phone,
         ...(email && { email }),
-        ...(company && { company }),
       },
       items: [...qty.entries()].map(([sku, quantity]) => ({ sku, quantity })),
-      ...(notes && { notes }),
     },
   };
 }
