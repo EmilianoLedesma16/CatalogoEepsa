@@ -22,7 +22,8 @@ interface CartItem extends Product {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  /** `openCart: false` agrega sin abrir el panel de cotización (lo usa el chat de Nexi). */
+  addToCart: (product: Product, openCart?: boolean) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, cantidad: number) => void;
   totalEstimado: number;
@@ -37,7 +38,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, openCart = true) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -45,7 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, { ...product, cantidad: 1 }];
     });
-    setIsCartOpen(true);
+    if (openCart) setIsCartOpen(true);
   };
 
   const removeFromCart = (productId: string) => {

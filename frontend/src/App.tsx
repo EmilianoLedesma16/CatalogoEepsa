@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, MessageSquare, List, ShieldCheck, Headset, Truck, Award, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, List, ShieldCheck, Headset, Truck, Award, MapPin, ExternalLink, CheckCircle, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -347,22 +347,9 @@ function CartUI() {
                   </div>
                   {quoteMessage && <p className="text-sm text-gray-500 mb-8">{quoteMessage}</p>}
 
-                  <p className="text-sm font-bold text-gray-600 mb-4">Elige cómo deseas continuar con tu pedido:</p>
-                  
-                  <div className="flex flex-col gap-3 w-full">
-                     <a href={`https://wa.me/525579916042?text=Hola, quiero darle seguimiento a mi cotización con folio ${quoteId}.`} target="_blank" rel="noopener noreferrer" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                        <WhatsAppIcon className="w-5 h-5 fill-white" /> WhatsApp
-                     </a>
-                     <a href={`mailto:ventas@eepsa.com.mx?subject=Cotización ${quoteId}&body=Hola, quiero darle seguimiento a mi cotización con folio ${quoteId}.`} className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                        <Mail className="w-5 h-5" /> Enviar Correo
-                     </a>
-                     <a href="tel:5579916042" className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                        <Phone className="w-5 h-5" /> Hablar a Telemarketing
-                     </a>
-                     <button className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                        <MapPin className="w-5 h-5" /> Visitar Tienda Física
-                     </button>
-                  </div>
+                  <a href="https://maps.app.goo.gl/k84HifViNSYAn8LMA" target="_blank" rel="noopener noreferrer" className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                     <MapPin className="w-5 h-5" /> Visualizar ubicación de la tienda
+                  </a>
                </div>
             ) : (
               <>
@@ -536,7 +523,7 @@ function Screen1Selection() {
       desc: 'Nuestro asistente técnico te guía paso a paso hasta el producto ideal según tu topología (FTTH, DWDM, Backhaul) y tu presupuesto.',
       cta: 'Iniciar consulta guiada',
       icon: Bot,
-      cornerIcon: MessageSquare,
+      mascot: '/nexi.png',
       onClick: () => navigate('/assistant'),
     },
     {
@@ -546,6 +533,7 @@ function Screen1Selection() {
       cta: 'Ver todos los productos',
       icon: LayoutGrid,
       cornerIcon: List,
+      mascot: null,
       onClick: () => goCatalog(),
     },
   ];
@@ -576,22 +564,33 @@ function Screen1Selection() {
               <button
                 key={p.title}
                 onClick={p.onClick}
-                className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 flex flex-col"
+                className="group relative text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 flex flex-col"
               >
                 <div className="w-12 h-12 mb-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center">
                   <p.icon className="w-6 h-6 text-teal-700" />
                 </div>
                 <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">{p.eyebrow}</span>
                 <h2 className="mt-1.5 text-xl font-semibold text-brand-ink font-heading">{p.title}</h2>
-                <p className="mt-3 text-sm text-gray-600 leading-relaxed flex-1">{p.desc}</p>
+                <p className={`mt-3 text-sm text-gray-600 leading-relaxed flex-1 ${p.mascot ? 'pr-24 sm:pr-32 md:pr-36' : ''}`}>{p.desc}</p>
                 <div className="w-full mt-8 flex items-center justify-between">
                   <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700">
                     {p.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </span>
-                  <span className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center">
-                    <p.cornerIcon className="w-4 h-4 text-teal-600" />
-                  </span>
+                  {p.cornerIcon && (
+                    <span className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center">
+                      <p.cornerIcon className="w-4 h-4 text-teal-600" />
+                    </span>
+                  )}
                 </div>
+                {/* Nexi sale por la esquina inferior derecha de la tarjeta */}
+                {p.mascot && (
+                  <img
+                    src={p.mascot}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none select-none absolute right-2 bottom-0 h-36 sm:h-44 md:h-56 md:-right-3 md:-bottom-8 z-10 drop-shadow-xl group-hover:-translate-y-1 transition-transform duration-300"
+                  />
+                )}
               </button>
             ))}
           </div>
@@ -642,7 +641,7 @@ function Screen1Selection() {
       )}
 
       {/* BENEFICIOS */}
-      <section className="bg-[#EEF2F6] px-4 sm:px-6 py-8">
+      <section className="px-4 sm:px-6 pb-16">
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {perks.map(p => (
             <div key={p.title} className="flex items-center gap-3 bg-white rounded-xl border border-gray-200/80 px-4 py-3.5">
@@ -672,7 +671,8 @@ type ChatMessage = {
 
 function Screen2AAssistant() {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cart, removeFromCart, updateQuantity, totalEstimado, setIsCartOpen } = useCart();
+  const [lastResults, setLastResults] = useState<{ category: string; products: Product[] } | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
@@ -734,6 +734,7 @@ function Screen2AAssistant() {
       const data = await res.json();
       const botMsgId = Date.now() + 1;
       setMessages(prev => [...prev, { id: botMsgId, type: 'bot', text: `¡Excelente! Encontré estas opciones para "${category}".`, products: data }]);
+      setLastResults({ category, products: data });
     } catch (e) {
       setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: 'Uy, tuvimos un problema de conexión. ¿Intentamos de nuevo?' }]);
       setWaitingForCategory(true);
@@ -742,10 +743,21 @@ function Screen2AAssistant() {
   };
 
   const handleAddToCartInChat = (p: Product) => {
-    addToCart(p);
+    addToCart(p, false);
     setMessages(prev => [
       ...prev,
       { id: Date.now(), type: 'bot', text: `He agregado "${p.nombre}" a tu cotización.`, icon: 'success', productImage: p.imagen_url ?? undefined }
+    ]);
+  };
+
+  // Vuelve a mostrar los productos de la categoría actual sin consultar de nuevo
+  const continueCategory = () => {
+    if (!lastResults) return;
+    const now = Date.now();
+    setMessages(prev => [
+      ...prev,
+      { id: now, type: 'user', text: `Seguir en ${lastResults.category}` },
+      { id: now + 1, type: 'bot', text: `Claro, aquí tienes de nuevo las opciones de "${lastResults.category}".`, products: lastResults.products },
     ]);
   };
 
@@ -761,7 +773,8 @@ function Screen2AAssistant() {
 
   return (
     <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 flex flex-col items-center sm:py-6 sm:px-4 bg-gray-50">
-      <div className="relative flex h-[calc(100vh-4rem)] w-full max-w-4xl flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-gray-200 premium-shadow overflow-hidden">
+      <div className="flex w-full max-w-6xl gap-6">
+      <div className="relative flex h-[calc(100vh-4rem)] w-full min-w-0 flex-1 flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-gray-200 premium-shadow overflow-hidden">
         <div className="p-3 bg-white/95 backdrop-blur-md border-b border-gray-100 z-20 flex items-center gap-3 shadow-sm">
            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-500 hover:text-teal-700 transition-colors p-1.5 rounded-full ml-1">
              <ArrowLeft className="w-5 h-5" />
@@ -881,8 +894,13 @@ function Screen2AAssistant() {
             
             {/* Action Buttons at the bottom of the chat */}
             {!loading && !waitingForCategory && messages.length > 2 && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start mt-4 mb-6">
-                <button onClick={resetSearch} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 px-5 rounded-full hover:bg-teal-50 hover:text-teal-700 transition-colors shadow-sm text-sm ml-2 sm:ml-10 premium-shadow">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-wrap justify-start gap-2 mt-4 mb-6 ml-2 sm:ml-10">
+                {lastResults && (
+                  <button onClick={continueCategory} className="flex items-center gap-2 bg-teal-600 border border-teal-600 text-white font-bold py-2.5 px-5 rounded-full hover:bg-teal-700 transition-colors shadow-sm text-sm">
+                    <ArrowRight className="w-4 h-4" /> Seguir en {lastResults.category}
+                  </button>
+                )}
+                <button onClick={resetSearch} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 px-5 rounded-full hover:bg-teal-50 hover:text-teal-700 transition-colors shadow-sm text-sm premium-shadow">
                   <RotateCcw className="w-4 h-4" /> Buscar otra categoría
                 </button>
               </motion.div>
@@ -917,7 +935,63 @@ function Screen2AAssistant() {
         {/* Decorative fade for bottom of chat */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
       </div>
-      <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={addToCart} />
+
+      {/* Panel lateral: lo que el usuario va seleccionando en el chat */}
+      <aside className="hidden lg:flex w-80 shrink-0 flex-col sm:h-[calc(100vh-8rem)] sm:max-h-[900px] bg-white border border-gray-200 rounded-[2rem] overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="text-base font-semibold text-brand-ink font-heading">Tu selección</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Se actualiza conforme avanzas con Nexi.</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-5 py-4 flex flex-col gap-6">
+          <section>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400 mb-2">Productos agregados</h3>
+            {cart.length === 0 ? (
+              <p className="text-sm text-gray-400">Agrega productos desde el chat y aparecerán aquí.</p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {cart.map(item => (
+                  <li key={item.id} className="flex items-center gap-3 rounded-xl border border-gray-100 p-2">
+                    <div className="w-12 h-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden">
+                      {item.imagen_url ? <img src={item.imagen_url} alt="" className="w-full h-full object-contain p-1 mix-blend-multiply" /> : <Grid className="w-5 h-5 text-gray-300" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-brand-ink line-clamp-2 leading-snug">{item.nombre}</p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">${Number(item.precio_estimado ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u</p>
+                      <div className="mt-1.5 inline-flex items-center rounded-lg border border-gray-200">
+                        <button onClick={() => updateQuantity(item.id, item.cantidad - 1)} disabled={item.cantidad <= 1} aria-label="Restar uno" className="p-1.5 text-gray-500 hover:text-teal-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors">
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="min-w-[1.75rem] text-center text-xs font-semibold text-brand-ink">{item.cantidad}</span>
+                        <button onClick={() => updateQuantity(item.id, item.cantidad + 1)} aria-label="Sumar uno" className="p-1.5 text-gray-500 hover:text-teal-700 transition-colors">
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <button onClick={() => removeFromCart(item.id)} aria-label={`Quitar ${item.nombre}`} className="p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {cart.length > 0 && (
+          <div className="px-5 py-4 border-t border-gray-100">
+            <div className="flex items-baseline justify-between mb-3">
+              <span className="text-sm text-gray-500">Total estimado</span>
+              <span className="text-lg font-bold text-teal-700">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[10px] font-medium text-gray-400">MXN</span></span>
+            </div>
+            <button onClick={() => setIsCartOpen(true)} className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-3 transition-colors">
+              Ver cotización
+            </button>
+          </div>
+        )}
+      </aside>
+      </div>
+      <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCartInChat} />
     </motion.div>
   );
 }
@@ -933,10 +1007,17 @@ function Screen2BCatalog() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('cat') ?? 'Todos');
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(searchParams.get('sub'));
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(searchParams.get('cat') ?? 'Equipo Activo');
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(searchParams.get('cat'));
 
   // Menú lateral = líneas y categorías del SINV (antes estaba fijo y se desfasaba del catálogo real)
   const catalogCategories: CatalogCategory[] = [{ name: 'Todos', sub: [] }, ...useCatalogCategories()];
+
+  // Al cambiar de categoría/subcategoría, volver arriba para ver la lista desde el inicio
+  const firstFilterRender = useRef(true);
+  useEffect(() => {
+    if (firstFilterRender.current) { firstFilterRender.current = false; return; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [selectedCategory, selectedSubCategory]);
 
   useEffect(() => {
     fetch(API_URL)
