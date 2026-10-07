@@ -12,6 +12,8 @@ const API_URL = '/api/productos';
 const NOMBRE_RE = /^(?=.{3,80}$)[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
 const NOMBRE_INVALIDO = /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g;
 
+const AVISO_PRECIOS = 'Precios de referencia, sujetos a cambio sin previo aviso y a disponibilidad.';
+
 interface CatalogCategory {
   name: string;
   sub: string[];
@@ -245,6 +247,15 @@ function CartUI() {
   const [quoteMessage, setQuoteMessage] = useState('');
   const [quoteError, setQuoteError] = useState('');
   const [contacto, setContacto] = useState({ nombre: '', telefono: '', correo: '' });
+  // Modo consulta (el SINV aún no está conectado): se puede ver el catálogo pero no cotizar en línea
+  const [sinCotizaciones, setSinCotizaciones] = useState('');
+  useEffect(() => {
+    if (!isCartOpen) return;
+    fetch('/api/estado')
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => setSinCotizaciones(data && data.cotizaciones === false ? (data.mensaje ?? 'Por ahora no recibimos cotizaciones en línea.') : ''))
+      .catch(() => setSinCotizaciones(''));
+  }, [isCartOpen]);
   // Una llave por intento de envío: si la red falla y el cliente reintenta, el SINV no duplica la cotización.
   // Cambiar el carrito o los datos genera una llave nueva (es otra solicitud).
   const idempotencyKey = useRef<string | null>(null);
@@ -408,8 +419,13 @@ function CartUI() {
                   <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MXN · IVA incluido</p>
                 </div>
               </div>
+              <p className="-mt-4 mb-5 text-right text-[11px] text-gray-400">{AVISO_PRECIOS}</p>
 
-              {cart.length > 0 && (
+              {sinCotizaciones && (
+                <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{sinCotizaciones}</p>
+              )}
+
+              {cart.length > 0 && !sinCotizaciones && (
                 <div className="mb-4 grid grid-cols-2 gap-2">
                   <p className="col-span-2 text-xs font-bold text-gray-600">¿A quién contactamos para cerrar tu pedido?</p>
                   <input className={`${inputClass} col-span-2`} placeholder="Nombre *" autoComplete="name" maxLength={80} value={contacto.nombre} onChange={e => setContacto({ ...contacto, nombre: e.target.value.replace(NOMBRE_INVALIDO, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '') })} />
@@ -430,7 +446,7 @@ function CartUI() {
                  <motion.button 
                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
                    onClick={handleGenerateQuote}
-                   disabled={isGenerating || cart.length === 0 || Boolean(contactError)}
+                   disabled={isGenerating || cart.length === 0 || Boolean(contactError) || Boolean(sinCotizaciones)}
                    className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-600/30 transition-colors"
                  >
                     {isGenerating ? 'Generando...' : 'Generar Cotización'}
@@ -467,7 +483,8 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
                   ))}
                 </div>
                 <h2 className="text-2xl font-black font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
-                <div className="text-3xl font-black text-teal-600 mb-4">${Number(product.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></div>
+                <div className="text-3xl font-black text-teal-600">${Number(product.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></div>
+                <p className="text-[11px] text-gray-400 mt-1 mb-4">IVA incluido. {AVISO_PRECIOS}</p>
                 <p className="text-sm font-medium text-gray-500 mb-6 flex-1 leading-relaxed">{product.descripcion}</p>
                 <div className="flex flex-col gap-3 mt-auto">
                    {product.optic_times_id && (
@@ -510,8 +527,9 @@ function Screen1Selection() {
   const lines = categories
     .map(c => {
       const items = products.filter(p => p.etiquetas[0] === c.name);
-      // Disponible = al menos un producto de la línea con existencia (disponible >= 1) en el SINV
-      const inStock = items.some(p => (p.disponible ?? 0) >= 1);
+      // Disponible = al menos un producto de la línea con existencia (disponible >= 1) en el SINV.
+      // null = sin dato de existencias (catálogo en modo consulta): no se muestra la etiqueta.
+      const inStock = items.some(p => p.disponible !== undefined) ? items.some(p => (p.disponible ?? 0) >= 1) : null;
       return { ...c, count: items.length, inStock, image: items.find(p => p.imagen_url)?.imagen_url ?? null };
     })
     .sort((a, b) => b.count - a.count);
@@ -621,10 +639,12 @@ function Screen1Selection() {
                     {l.image
                       ? <img src={l.image} alt={l.name} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
                       : <LayoutGrid className="w-10 h-10 text-gray-300" />}
-                    <span className={`absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${l.inStock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${l.inStock ? 'bg-teal-600' : 'bg-gray-400'}`} />
-                      {l.inStock ? 'Disponible' : 'No disponible'}
-                    </span>
+                    {l.inStock !== null && (
+                      <span className={`absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${l.inStock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${l.inStock ? 'bg-teal-600' : 'bg-gray-400'}`} />
+                        {l.inStock ? 'Disponible' : 'No disponible'}
+                      </span>
+                    )}
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-brand-ink font-heading">{l.name}</h3>
                   <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
@@ -1140,8 +1160,9 @@ function Screen2BCatalog() {
             </div>
          ) : (
            <>
-             <div className="mb-6 flex items-center justify-between">
+             <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                <span className="text-sm font-bold text-gray-500">{filtered.length} productos encontrados</span>
+               <span className="text-xs text-gray-400">{AVISO_PRECIOS}</span>
              </div>
              
              <AnimatePresence mode="wait">
