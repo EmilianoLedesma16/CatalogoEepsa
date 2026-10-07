@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 /** Producto tal como lo entrega el backend del catálogo (datos del SINV). `id` = SKU. */
@@ -34,9 +34,34 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// El carrito sobrevive a recargas durante 24 h desde el último cambio. Sólo productos y
+// cantidades: los datos de contacto no se guardan (equipos compartidos). El SKU y el precio
+// se validan de nuevo en el SINV al enviar.
+const CART_KEY = 'eepsa-carrito';
+const CART_TTL_MS = 24 * 60 * 60 * 1000;
+
+function loadCart(): CartItem[] {
+  try {
+    const saved = JSON.parse(localStorage.getItem(CART_KEY) ?? 'null') as { at?: number; items?: unknown } | null;
+    if (!saved || typeof saved.at !== 'number' || Date.now() - saved.at > CART_TTL_MS || !Array.isArray(saved.items)) return [];
+    return (saved.items as CartItem[]).filter(i => i && typeof i.sku === 'string' && Number.isInteger(i.cantidad) && i.cantidad > 0);
+  } catch {
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>(loadCart);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (cart.length) localStorage.setItem(CART_KEY, JSON.stringify({ at: Date.now(), items: cart }));
+      else localStorage.removeItem(CART_KEY);
+    } catch {
+      // Navegación privada o almacenamiento bloqueado: el carrito sólo vive en esta pestaña
+    }
+  }, [cart]);
 
   const addToCart = (product: Product, openCart = true) => {
     setCart(prev => {
