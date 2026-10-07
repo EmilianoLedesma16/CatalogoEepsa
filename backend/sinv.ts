@@ -69,6 +69,13 @@ export async function sinvRequest<T>(
   if (res.status >= 500 || res.status === 429) {
     throw new SinvUnavailableError(`SINV respondió ${res.status}`);
   }
+  // 401/403 = llaves mal copiadas o reloj del NAS desfasado (la firma tolera ±5 min). Es un
+  // problema nuestro, no del cliente: la cotización se encola y sale sola al corregirlo.
+  if (res.status === 401 || res.status === 403) {
+    const code = (data as { code?: string } | null)?.code ?? '';
+    console.error(`⚠ SINV rechazó la firma (${res.status} ${code}): revisar SINV_API_KEY, SINV_HMAC_SECRET y la hora del NAS`);
+    throw new SinvUnavailableError(`SINV respondió ${res.status} ${code}`.trim());
+  }
   return { status: res.status, data: data as T };
 }
 
