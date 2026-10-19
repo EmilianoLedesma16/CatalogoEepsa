@@ -1,0 +1,29 @@
+name: Monitor SINV ↔ catálogo
+
+# Revisiones de solo lectura contra producción (no crea cotizaciones ni cambia datos).
+# Si alguna falla, el run queda en rojo y GitHub manda correo (Settings → Notifications → Actions).
+on:
+  schedule:
+    - cron: '*/15 12-23,0-4 * * *' # cada 15 min de 06:00 a 22:00 CDMX
+  workflow_dispatch: {}
+
+concurrency:
+  group: monitor-sinv
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    # Runner de GitHub, no el del NAS: así se prueba desde fuera, como un cliente
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Revisar SINV y catálogo
+        env:
+          SINV_BASE_URL: ${{ secrets.SINV_BASE_URL }}
+          SINV_API_KEY: ${{ secrets.SINV_API_KEY }}
+          SINV_HMAC_SECRET: ${{ secrets.SINV_HMAC_SECRET }}
+        run: node .github/scripts/monitor-sinv.mjs
