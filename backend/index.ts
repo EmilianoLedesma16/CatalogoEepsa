@@ -119,7 +119,8 @@ async function loadCatalog(): Promise<CatalogProduct[]> {
     sku: p.sku,
     nombre: p.name,
     descripcion: p.description ?? '',
-    precio_estimado: Number(p.price),
+    // 0 = el SINV aún no tiene precio: el frontend muestra «Precio a cotizar»
+    precio_estimado: Number(p.price) > 0 ? Number(p.price) : null,
     imagen_url: p.imageUrl,
     etiquetas: [p.line, p.category].filter((t): t is string => Boolean(t)),
     linea: p.line,
