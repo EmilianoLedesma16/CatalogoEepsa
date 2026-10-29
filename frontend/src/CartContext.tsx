@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { tienePrecio } from './precio';
 
 /** Producto tal como lo entrega el backend del catálogo (datos del SINV). `id` = SKU. */
 export interface Product {
@@ -27,6 +28,8 @@ interface CartContextType {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, cantidad: number) => void;
   totalEstimado: number;
+  /** Hay partidas sin precio que el asesor cotizará aparte. */
+  hayPorCotizar: boolean;
   isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
   clearCart: () => void;
@@ -88,10 +91,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return acc + (price * item.cantidad);
   }, 0);
 
+  const hayPorCotizar = cart.some(item => !tienePrecio(item.precio_estimado));
+
   const clearCart = () => setCart([]);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, totalEstimado, isCartOpen, setIsCartOpen, clearCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, totalEstimado, hayPorCotizar, isCartOpen, setIsCartOpen, clearCart }}>
       {children}
     </CartContext.Provider>
   );

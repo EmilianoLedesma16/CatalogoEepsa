@@ -4,6 +4,7 @@ import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phon
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
+import { tienePrecio, formatoMXN } from './precio';
 import type { Product } from './CartContext';
 
 const API_URL = '/api/productos';
@@ -239,7 +240,7 @@ function GlobalNavbar() {
 }
 
 function CartUI() {
-  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalEstimado, clearCart } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalEstimado, hayPorCotizar, clearCart } = useCart();
   const [isGenerating, setIsGenerating] = useState(false);
   const [quoteSuccess, setQuoteSuccess] = useState(false);
   const [quoteId, setQuoteId] = useState('');
@@ -417,6 +418,7 @@ function CartUI() {
                 <div className="text-right">
                   <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MXN · IVA incluido</p>
+                  {hayPorCotizar && <p className="text-[11px] font-medium text-amber-700 mt-1">+ partidas con precio a cotizar</p>}
                 </div>
               </div>
               <p className="-mt-4 mb-5 text-right text-[11px] text-gray-400">{AVISO_PRECIOS}</p>
@@ -483,7 +485,7 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
                   ))}
                 </div>
                 <h2 className="text-2xl font-black font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
-                <div className="text-3xl font-black text-teal-600">${Number(product.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></div>
+                <div className="text-3xl font-black text-teal-600">{tienePrecio(product.precio_estimado) ? <>${formatoMXN(product.precio_estimado)} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
                 <p className="text-[11px] text-gray-400 mt-1 mb-4">IVA incluido. {AVISO_PRECIOS}</p>
                 <p className="text-sm font-medium text-gray-500 mb-6 flex-1 leading-relaxed">{product.descripcion}</p>
                 <div className="flex flex-col gap-3 mt-auto">
@@ -691,7 +693,7 @@ type ChatMessage = {
 
 function Screen2AAssistant() {
   const navigate = useNavigate();
-  const { addToCart, cart, removeFromCart, updateQuantity, totalEstimado, setIsCartOpen } = useCart();
+  const { addToCart, cart, removeFromCart, updateQuantity, totalEstimado, hayPorCotizar, setIsCartOpen } = useCart();
   const [lastResults, setLastResults] = useState<{ category: string; products: Product[] } | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -889,7 +891,7 @@ function Screen2AAssistant() {
                                    <div className="p-3 sm:p-4 flex-1 flex flex-col">
                                       <h3 className="font-bold font-heading text-brand-ink text-[13px] sm:text-[14px] mb-1 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
                                       <p className="text-[11px] sm:text-[12px] font-medium text-gray-400 mb-2 line-clamp-2 leading-snug">{p.descripcion}</p>
-                                      <div className="text-[15px] sm:text-base font-black text-teal-600 mt-auto">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wider">MXN</span></div>
+                                      <div className="text-[15px] sm:text-base font-black text-teal-600 mt-auto">{tienePrecio(p.precio_estimado) ? <>${formatoMXN(p.precio_estimado)} <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
                                    </div>
                                  </div>
                                  
@@ -977,7 +979,7 @@ function Screen2AAssistant() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-brand-ink line-clamp-2 leading-snug">{item.nombre}</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">${Number(item.precio_estimado ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u</p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">{tienePrecio(item.precio_estimado) ? `$${formatoMXN(item.precio_estimado)} c/u` : 'Precio a cotizar'}</p>
                       <div className="mt-1.5 inline-flex items-center rounded-lg border border-gray-200">
                         <button onClick={() => updateQuantity(item.id, item.cantidad - 1)} disabled={item.cantidad <= 1} aria-label="Restar uno" className="p-1.5 text-gray-500 hover:text-teal-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors">
                           <Minus className="w-3 h-3" />
@@ -1004,6 +1006,7 @@ function Screen2AAssistant() {
               <span className="text-sm text-gray-500">Total estimado</span>
               <span className="text-lg font-bold text-teal-700">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[10px] font-medium text-gray-400">MXN</span></span>
             </div>
+            {hayPorCotizar && <p className="-mt-2 mb-3 text-right text-[11px] font-medium text-amber-700">+ partidas con precio a cotizar</p>}
             <button onClick={() => setIsCartOpen(true)} className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-3 transition-colors">
               Ver cotización
             </button>
@@ -1195,7 +1198,7 @@ function Screen2BCatalog() {
                                   {p.en_stock ? 'En existencia' : 'Sobre pedido'}
                                 </span>
                               )}
-                              <div className="text-xl font-black text-teal-600 mb-4">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></div>
+                              <div className="text-xl font-black text-teal-600 mb-4">{tienePrecio(p.precio_estimado) ? <>${formatoMXN(p.precio_estimado)} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
                            </div>
                         </div>
 
