@@ -119,8 +119,8 @@ async function loadCatalog(): Promise<CatalogProduct[]> {
     sku: p.sku,
     nombre: p.name,
     descripcion: p.description ?? '',
-    // 0 = el SINV aún no tiene precio: el frontend muestra «Precio a cotizar»
-    precio_estimado: Number(p.price) > 0 ? Number(p.price) : null,
+    // El catálogo público no muestra precios: los confirma un asesor en la cotización
+    precio_estimado: null,
     imagen_url: p.imageUrl,
     etiquetas: [p.line, p.category].filter((t): t is string => Boolean(t)),
     linea: p.line,
@@ -160,7 +160,7 @@ async function loadLocalCatalog(): Promise<CatalogProduct[]> {
       sku: r.sku,
       nombre: r.nombre,
       descripcion: r.descripcion ?? '',
-      precio_estimado: r.precio_estimado === null ? null : Number(r.precio_estimado),
+      precio_estimado: null,
       // init.sql trae /static/img/…; las imágenes se sirven en /catalogo-media
       imagen_url: r.imagen_url ? r.imagen_url.replace(/^\/static\/img\//, '/catalogo-media/') : null,
       etiquetas,

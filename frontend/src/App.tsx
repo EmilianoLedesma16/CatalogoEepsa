@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, List, ShieldCheck, Headset, Truck, Award, MapPin, ExternalLink, CheckCircle, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, List, ShieldCheck, Headset, Truck, Award, MapPin, CheckCircle, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
-import { tienePrecio, formatoMXN } from './precio';
 import type { Product } from './CartContext';
 
 const API_URL = '/api/productos';
@@ -13,7 +12,9 @@ const API_URL = '/api/productos';
 const NOMBRE_RE = /^(?=.{3,80}$)[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
 const NOMBRE_INVALIDO = /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]/g;
 
-const AVISO_PRECIOS = 'Precios de referencia, sujetos a cambio sin previo aviso y a disponibilidad.';
+
+/** SKU del catálogo «Fijación y Limpieza FTTH» que se muestran en la pantalla de inicio. */
+const PRODUCTOS_ESTRELLA = ['EEP-F001', 'EEP-F002', 'EEP-K003', 'EEP-K001'];
 
 interface CatalogCategory {
   name: string;
@@ -240,7 +241,7 @@ function GlobalNavbar() {
 }
 
 function CartUI() {
-  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalEstimado, hayPorCotizar, clearCart } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, clearCart } = useCart();
   const [isGenerating, setIsGenerating] = useState(false);
   const [quoteSuccess, setQuoteSuccess] = useState(false);
   const [quoteId, setQuoteId] = useState('');
@@ -413,15 +414,6 @@ function CartUI() {
                 <AlertCircle className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
                 <p><strong>Nota importante:</strong> No se procesan pagos en línea por este medio. Los pagos se acordarán directamente con un asesor tras generar la cotización.</p>
               </div>
-              <div className="flex justify-between items-end mb-6">
-                <span className="font-medium text-gray-500">Total Estimado</span>
-                <div className="text-right">
-                  <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MXN · IVA incluido</p>
-                  {hayPorCotizar && <p className="text-[11px] font-medium text-amber-700 mt-1">+ partidas con precio a cotizar</p>}
-                </div>
-              </div>
-              <p className="-mt-4 mb-5 text-right text-[11px] text-gray-400">{AVISO_PRECIOS}</p>
 
               {sinCotizaciones && (
                 <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{sinCotizaciones}</p>
@@ -485,15 +477,8 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
                   ))}
                 </div>
                 <h2 className="text-2xl font-black font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
-                <div className="text-3xl font-black text-teal-600">{tienePrecio(product.precio_estimado) ? <>${formatoMXN(product.precio_estimado)} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
-                <p className="text-[11px] text-gray-400 mt-1 mb-4">IVA incluido. {AVISO_PRECIOS}</p>
                 <p className="text-sm font-medium text-gray-500 mb-6 flex-1 leading-relaxed">{product.descripcion}</p>
                 <div className="flex flex-col gap-3 mt-auto">
-                   {product.optic_times_id && (
-                     <a href={`https://optictimes.mx/product?id=${product.optic_times_id}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3.5 rounded-xl transition-colors">
-                       <ExternalLink className="w-5 h-5" /> Ver Ficha Técnica Oficial
-                     </a>
-                   )}
                    <button onClick={() => { onAddToCart(product); onClose(); }} className="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-600/30 transition-colors">
                      <ShoppingCart className="w-5 h-5" /> Añadir a Cotización
                    </button>
@@ -536,6 +521,11 @@ function Screen1Selection() {
     })
     .sort((a, b) => b.count - a.count);
 
+  // Productos estrella (catálogo «Fijación y Limpieza FTTH»): el SINV no tiene campo de destacado
+  const estrella = PRODUCTOS_ESTRELLA
+    .map(sku => products.find(p => p.sku === sku))
+    .filter((p): p is Product => Boolean(p));
+
   const paths = [
     {
       eyebrow: 'Diagnóstico asistido',
@@ -549,7 +539,7 @@ function Screen1Selection() {
     {
       eyebrow: 'Inventario en línea',
       title: 'Explorar Catálogo Completo',
-      desc: 'Consulta disponibilidad en tiempo real, compara especificaciones, abre fichas técnicas y arma tu cotización al instante.',
+      desc: 'Consulta disponibilidad en tiempo real, compara especificaciones y arma tu cotización al instante.',
       cta: 'Ver todos los productos',
       icon: LayoutGrid,
       cornerIcon: List,
@@ -616,6 +606,43 @@ function Screen1Selection() {
           </div>
         </div>
       </section>
+
+      {/* PRODUCTOS ESTRELLA */}
+      {estrella.length > 0 && (
+        <section className="px-4 sm:px-6 pb-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Fijación y limpieza FTTH</span>
+                <h2 className="mt-1 text-2xl md:text-3xl font-bold text-brand-ink font-heading">Productos estrella</h2>
+              </div>
+              <button onClick={() => goCatalog()} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-600">
+                Explorar todo el catálogo <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {estrella.map(p => (
+                <button
+                  key={p.sku}
+                  onClick={() => goCatalog({ q: p.sku })}
+                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                >
+                  <div className="w-full h-36 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">
+                    {p.imagen_url
+                      ? <img src={p.imagen_url} alt={p.nombre} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                      : <LayoutGrid className="w-10 h-10 text-gray-300" />}
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-brand-ink font-heading leading-snug">{p.nombre}</h3>
+                  <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">{p.descripcion}</p>
+                  <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
+                    Ver producto <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CATEGORÍAS */}
       {lines.length > 0 && (
@@ -693,7 +720,7 @@ type ChatMessage = {
 
 function Screen2AAssistant() {
   const navigate = useNavigate();
-  const { addToCart, cart, removeFromCart, updateQuantity, totalEstimado, hayPorCotizar, setIsCartOpen } = useCart();
+  const { addToCart, cart, removeFromCart, updateQuantity, setIsCartOpen } = useCart();
   const [lastResults, setLastResults] = useState<{ category: string; products: Product[] } | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -891,7 +918,6 @@ function Screen2AAssistant() {
                                    <div className="p-3 sm:p-4 flex-1 flex flex-col">
                                       <h3 className="font-bold font-heading text-brand-ink text-[13px] sm:text-[14px] mb-1 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
                                       <p className="text-[11px] sm:text-[12px] font-medium text-gray-400 mb-2 line-clamp-2 leading-snug">{p.descripcion}</p>
-                                      <div className="text-[15px] sm:text-base font-black text-teal-600 mt-auto">{tienePrecio(p.precio_estimado) ? <>${formatoMXN(p.precio_estimado)} <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
                                    </div>
                                  </div>
                                  
@@ -979,7 +1005,6 @@ function Screen2AAssistant() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-brand-ink line-clamp-2 leading-snug">{item.nombre}</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">{tienePrecio(item.precio_estimado) ? `$${formatoMXN(item.precio_estimado)} c/u` : 'Precio a cotizar'}</p>
                       <div className="mt-1.5 inline-flex items-center rounded-lg border border-gray-200">
                         <button onClick={() => updateQuantity(item.id, item.cantidad - 1)} disabled={item.cantidad <= 1} aria-label="Restar uno" className="p-1.5 text-gray-500 hover:text-teal-700 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors">
                           <Minus className="w-3 h-3" />
@@ -1002,11 +1027,6 @@ function Screen2AAssistant() {
 
         {cart.length > 0 && (
           <div className="px-5 py-4 border-t border-gray-100">
-            <div className="flex items-baseline justify-between mb-3">
-              <span className="text-sm text-gray-500">Total estimado</span>
-              <span className="text-lg font-bold text-teal-700">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[10px] font-medium text-gray-400">MXN</span></span>
-            </div>
-            {hayPorCotizar && <p className="-mt-2 mb-3 text-right text-[11px] font-medium text-amber-700">+ partidas con precio a cotizar</p>}
             <button onClick={() => setIsCartOpen(true)} className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-3 transition-colors">
               Ver cotización
             </button>
@@ -1165,7 +1185,6 @@ function Screen2BCatalog() {
            <>
              <div className="mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                <span className="text-sm font-bold text-gray-500">{filtered.length} productos encontrados</span>
-               <span className="text-xs text-gray-400">{AVISO_PRECIOS}</span>
              </div>
              
              <AnimatePresence mode="wait">
@@ -1198,20 +1217,10 @@ function Screen2BCatalog() {
                                   {p.en_stock ? 'En existencia' : 'Sobre pedido'}
                                 </span>
                               )}
-                              <div className="text-xl font-black text-teal-600 mb-4">{tienePrecio(p.precio_estimado) ? <>${formatoMXN(p.precio_estimado)} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></> : 'Precio a cotizar'}</div>
                            </div>
                         </div>
 
                         <div className="p-6 pt-4 mt-auto flex flex-col gap-4 relative z-20">
-                           {p.optic_times_id && (
-                             <a 
-                               href={`https://optictimes.mx/product?id=${p.optic_times_id}`}
-                               target="_blank" rel="noopener noreferrer"
-                               className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-bold text-xs transition-colors"
-                             >
-                               <ExternalLink className="w-3.5 h-3.5" /> Ver Ficha Técnica Oficial
-                             </a>
-                           )}
 
                            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Añadir a Cotización</span>
