@@ -410,7 +410,7 @@ app.post('/api/cotizaciones', async (req: Request, res: Response) => {
       console.error('No se pudo encolar la cotización:', dbErr);
       return res.status(503).json({
         success: false,
-        error: 'Por el momento no es posible generar la cotización. Llámanos al 55 5839 8082 o escríbenos por WhatsApp al 55 4324 1575.',
+        error: 'Por el momento no es posible generar la cotización. Llámanos o escríbenos por WhatsApp al 55 8188 0459.',
       });
     }
     return res.status(202).json({
