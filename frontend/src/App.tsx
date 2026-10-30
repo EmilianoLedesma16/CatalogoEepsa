@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, Bot, LayoutGrid, List, ShieldCheck, Headset, Truck, Award, MapPin, CheckCircle, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, ArrowRight, Phone, LayoutGrid, MapPin, CheckCircle, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -68,12 +68,12 @@ function SkeletonLoader() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ml-[52px] max-w-[88%] w-full overflow-hidden pb-4">
       <div className="flex gap-4">
         {[1, 2].map((i) => (
-          <div key={i} className="shrink-0 w-64 bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm flex flex-col p-4 animate-pulse">
-            <div className="h-32 bg-gray-200 rounded-xl mb-4 w-full"></div>
+          <div key={i} className="shrink-0 w-64 bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm flex flex-col p-4 animate-pulse">
+            <div className="h-32 bg-gray-200 rounded-md mb-4 w-full"></div>
             <div className="h-4 bg-gray-200 rounded-full w-3/4 mb-2"></div>
             <div className="h-3 bg-gray-200 rounded-full w-full mb-1"></div>
             <div className="h-3 bg-gray-200 rounded-full w-5/6 mb-4"></div>
-            <div className="h-10 bg-teal-50 rounded-xl w-full mt-auto"></div>
+            <div className="h-10 bg-teal-50 rounded-md w-full mt-auto"></div>
           </div>
         ))}
       </div>
@@ -142,17 +142,17 @@ function GlobalNavbar() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 min-[993px]:gap-10">
             <div className="hidden flex-col gap-1 text-[0.8rem] min-[993px]:flex">
               <a
-                href="https://wa.me/525543241575?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20informaci%C3%B3n%20sobre%20sus%20servicios."
+                href="https://wa.me/525581880459?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20informaci%C3%B3n%20sobre%20sus%20servicios."
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Contactar a EEPSA por WhatsApp"
                 className="flex items-center gap-1.5 text-[#343a40] transition-colors hover:text-[#1a5952]"
               >
                 <span className="flex w-4 justify-center" aria-hidden="true"><WhatsAppIcon className="h-[0.8rem] w-[0.8rem]" /></span>
-                <span>(52) 5543241575</span>
+                <span>+52 55 8188 0459</span>
               </a>
               <a href="mailto:contacto@eepsa.com.mx" aria-label="Enviar correo electrónico a EEPSA" className="flex items-center gap-1.5 text-[#343a40] transition-colors hover:text-[#1a5952]">
                 <span className="flex w-4 justify-center" aria-hidden="true"><EnvelopeIcon className="h-[0.8rem] w-[0.8rem]" /></span>
@@ -165,7 +165,7 @@ function GlobalNavbar() {
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={() => setIsCartOpen(true)}
                 aria-label="Ver mi cotización"
-                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-teal-50 text-teal-700 transition-colors hover:bg-teal-100"
+                className="relative flex h-12 w-12 items-center justify-center rounded-full bg-teal-50 text-teal-700 transition-colors hover:bg-teal-100"
               >
                 <ShoppingCart className="h-5 w-5" />
                 <AnimatePresence>
@@ -228,8 +228,8 @@ function GlobalNavbar() {
         </nav>
 
         <div className="mt-auto flex flex-col gap-3 border-t border-[#eee] pt-5">
-          <a href="tel:+525558398082" className="flex items-center gap-2.5 text-[0.9rem] text-[#6c757d]">
-            <Phone className="h-4 w-4 text-[#1a5952]" /> (55) 5839 8082
+          <a href="tel:+525581880459" className="flex items-center gap-2.5 text-[0.9rem] text-[#6c757d]">
+            <Phone className="h-4 w-4 text-[#1a5952]" /> +52 55 8188 0459
           </a>
           <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-2.5 text-[0.9rem] text-[#6c757d]">
             <EnvelopeIcon className="h-[0.9rem] w-[0.9rem] text-[#1a5952]" /> contacto@eepsa.com.mx
@@ -321,7 +321,7 @@ function CartUI() {
     }
   };
 
-  const inputClass = 'w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/20';
+  const inputClass = 'w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/20';
 
   return (
     <AnimatePresence>
@@ -337,7 +337,7 @@ function CartUI() {
             className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col"
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-2xl font-heading font-extrabold text-teal-800">Tu Cotización</h2>
+              <h2 className="text-2xl font-heading font-bold text-teal-800">Tu cotización</h2>
               <button onClick={closeCart} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
                 <X className="w-6 h-6" />
               </button>
@@ -348,20 +348,20 @@ function CartUI() {
                   <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
                      <CheckCircle className="w-10 h-10" /> 
                   </div>
-                  <h3 className="text-2xl font-black font-heading text-brand-ink mb-2">¡Cotización Generada!</h3>
+                  <h3 className="text-2xl font-bold font-heading text-brand-ink mb-2">¡Cotización generada!</h3>
                   <p className="text-gray-500 mb-6">
                     {quotePending
                       ? 'Tu pedido quedó registrado con la siguiente referencia (en breve te asignaremos un folio):'
                       : 'Tu pedido ha sido registrado exitosamente con el siguiente folio:'}
                   </p>
 
-                  <div className="bg-gray-50 border-2 border-dashed border-teal-200 rounded-2xl p-6 w-full mb-4">
-                     <span className="block text-3xl font-black text-teal-700 tracking-wider font-mono">{quoteId}</span>
+                  <div className="bg-gray-50 border-2 border-dashed border-teal-200 rounded-lg p-6 w-full mb-4">
+                     <span className="block text-3xl font-bold text-teal-700 tracking-wider font-mono">{quoteId}</span>
                   </div>
                   {quoteMessage && <p className="text-sm text-gray-500 mb-8">{quoteMessage}</p>}
 
-                  <a href="https://maps.app.goo.gl/k84HifViNSYAn8LMA" target="_blank" rel="noopener noreferrer" className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                     <MapPin className="w-5 h-5" /> Visualizar ubicación de la tienda
+                  <a href="https://maps.app.goo.gl/k84HifViNSYAn8LMA" target="_blank" rel="noopener noreferrer" className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                     <MapPin className="w-5 h-5" /> Ver ubicación de la tienda
                   </a>
                </div>
             ) : (
@@ -381,9 +381,9 @@ function CartUI() {
                     {cart.map(item => (
                       <motion.div 
                         key={item.id} layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, marginBottom: 0 }}
-                        className="flex gap-4 p-4 bg-white rounded-3xl border border-gray-100 premium-shadow"
+                        className="flex gap-4 p-4 bg-white rounded-lg border border-gray-100 premium-shadow"
                       >
-                        <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
+                        <div className="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
                           {item.imagen_url ? (
                              <img src={item.imagen_url} alt={item.nombre} className="w-full h-full object-contain mix-blend-multiply p-1" />
                           ) : (
@@ -410,13 +410,13 @@ function CartUI() {
             </div>
 
             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-10">
-              <div className="bg-gray-50 text-gray-600 text-xs font-medium px-4 py-3 rounded-xl mb-5 flex items-start gap-2 border border-gray-200">
+              <div className="bg-gray-50 text-gray-600 text-xs font-medium px-4 py-3 rounded-md mb-5 flex items-start gap-2 border border-gray-200">
                 <AlertCircle className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
                 <p><strong>Nota importante:</strong> No se procesan pagos en línea por este medio. Los pagos se acordarán directamente con un asesor tras generar la cotización.</p>
               </div>
 
               {sinCotizaciones && (
-                <p role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{sinCotizaciones}</p>
+                <p role="status" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">{sinCotizaciones}</p>
               )}
 
               {cart.length > 0 && !sinCotizaciones && (
@@ -433,7 +433,7 @@ function CartUI() {
               )}
 
               {quoteError && (
-                <p role="alert" className="mb-3 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{quoteError}</p>
+                <p role="alert" className="mb-3 rounded-md border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">{quoteError}</p>
               )}
 
               <div className="flex flex-col gap-3">
@@ -441,9 +441,9 @@ function CartUI() {
                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
                    onClick={handleGenerateQuote}
                    disabled={isGenerating || cart.length === 0 || Boolean(contactError) || Boolean(sinCotizaciones)}
-                   className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-600/30 transition-colors"
+                   className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white py-3.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors"
                  >
-                    {isGenerating ? 'Generando...' : 'Generar Cotización'}
+                    {isGenerating ? 'Generando...' : 'Generar cotización'}
                  </motion.button>
               </div>
             </div>
@@ -464,10 +464,10 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-brand-ink/40 backdrop-blur-sm" onClick={onClose} />
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-3xl p-6 md:p-8 max-w-3xl w-full shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-lg p-6 md:p-8 max-w-3xl w-full shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
             <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"><X className="w-5 h-5"/></button>
             <div className="flex flex-col md:flex-row gap-6">
-              <div className="w-full md:w-1/2 bg-gray-50 rounded-2xl flex items-center justify-center p-6 border border-gray-100">
+              <div className="w-full md:w-1/2 bg-gray-50 rounded-lg flex items-center justify-center p-6 border border-gray-100">
                 {product.imagen_url ? <img src={product.imagen_url} alt={product.nombre} className="w-full h-auto max-h-[300px] object-contain mix-blend-multiply" /> : <Grid className="w-16 h-16 text-gray-300" />}
               </div>
               <div className="w-full md:w-1/2 flex flex-col">
@@ -476,11 +476,11 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
                     <span key={t} className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{t}</span>
                   ))}
                 </div>
-                <h2 className="text-2xl font-black font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
+                <h2 className="text-2xl font-bold font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
                 <p className="text-sm font-medium text-gray-500 mb-6 flex-1 leading-relaxed">{product.descripcion}</p>
                 <div className="flex flex-col gap-3 mt-auto">
-                   <button onClick={() => { onAddToCart(product); onClose(); }} className="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-600/30 transition-colors">
-                     <ShoppingCart className="w-5 h-5" /> Añadir a Cotización
+                   <button onClick={() => { onAddToCart(product); onClose(); }} className="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-md transition-colors">
+                     <ShoppingCart className="w-5 h-5" /> Agregar a cotización
                    </button>
                 </div>
               </div>
@@ -528,31 +528,21 @@ function Screen1Selection() {
 
   const paths = [
     {
-      eyebrow: 'Diagnóstico asistido',
-      title: 'Asesoría Técnica con Nexi',
-      desc: 'Nuestro asistente técnico te guía paso a paso hasta el producto ideal según tu topología (FTTH, DWDM, Backhaul) y tu presupuesto.',
-      cta: 'Iniciar consulta guiada',
-      icon: Bot,
+      title: 'Buscar con Nexi',
+      desc: 'Elige una categoría y Nexi te muestra lo que tenemos. Desde el chat agregas los productos a tu cotización.',
+      cta: 'Hablar con Nexi',
       mascot: '/nexi.png',
+      thumbs: [] as string[],
       onClick: () => navigate('/assistant'),
     },
     {
-      eyebrow: 'Inventario en línea',
-      title: 'Explorar Catálogo Completo',
-      desc: 'Consulta disponibilidad en tiempo real, compara especificaciones y arma tu cotización al instante.',
+      title: 'Ver el catálogo completo',
+      desc: 'Busca por nombre, SKU o categoría, revisa qué hay en existencia y arma tu lista para cotizar.',
       cta: 'Ver todos los productos',
-      icon: LayoutGrid,
-      cornerIcon: List,
       mascot: null,
+      thumbs: lines.map(l => l.image).filter((img): img is string => Boolean(img)).slice(0, 4),
       onClick: () => goCatalog(),
     },
-  ];
-
-  const perks = [
-    { icon: ShieldCheck, title: 'Garantía oficial eepsa', desc: 'Respaldo directo de fábrica' },
-    { icon: Headset, title: 'Soporte especializado', desc: 'Ingenieros certificados en fibra' },
-    { icon: Truck, title: 'Envíos inmediatos', desc: 'Distribución nacional en México' },
-    { icon: Award, title: 'Certificación ITU-T', desc: 'Normativas G.652, G.657 y TIA' },
   ];
 
   return (
@@ -565,7 +555,7 @@ function Screen1Selection() {
               Catálogo de <span className="text-teal-600">Equipamiento Óptico</span>
             </h1>
             <p className="mt-5 text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Elige la forma más ágil de encontrar el equipo, consumible o solución de telecomunicaciones que requiere tu proyecto de red e infraestructura crítica.
+              Cables, conectores, splitters, herramientas y accesorios de fibra óptica. Arma tu lista y te mandamos la cotización.
             </p>
           </div>
 
@@ -574,23 +564,24 @@ function Screen1Selection() {
               <button
                 key={p.title}
                 onClick={p.onClick}
-                className="group relative text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-7 md:p-8 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 flex flex-col"
+                className="group relative text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-lg p-7 md:p-8 shadow-sm hover:shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 flex flex-col"
               >
-                <div className="w-12 h-12 mb-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center">
-                  <p.icon className="w-6 h-6 text-teal-700" />
-                </div>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">{p.eyebrow}</span>
-                <h2 className="mt-1.5 text-xl font-semibold text-brand-ink font-heading">{p.title}</h2>
+                {/* Fotos reales del catálogo en lugar de un icono genérico */}
+                {p.thumbs.length > 0 && (
+                  <div className="mb-6 grid grid-cols-4 gap-2">
+                    {p.thumbs.map(src => (
+                      <div key={src} className="aspect-square rounded-lg bg-gray-50 border border-gray-100 overflow-hidden">
+                        <img src={src} alt="" aria-hidden="true" loading="lazy" className="w-full h-full object-contain p-1.5 mix-blend-multiply" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <h2 className="text-xl font-semibold text-brand-ink font-heading">{p.title}</h2>
                 <p className={`mt-3 text-sm text-gray-600 leading-relaxed flex-1 ${p.mascot ? 'pr-24 sm:pr-32 md:pr-36' : ''}`}>{p.desc}</p>
-                <div className="w-full mt-8 flex items-center justify-between">
+                <div className="w-full mt-8">
                   <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700">
                     {p.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </span>
-                  {p.cornerIcon && (
-                    <span className="w-9 h-9 rounded-full bg-teal-50 flex items-center justify-center">
-                      <p.cornerIcon className="w-4 h-4 text-teal-600" />
-                    </span>
-                  )}
                 </div>
                 {/* Nexi sale por la esquina inferior derecha de la tarjeta */}
                 {p.mascot && (
@@ -613,29 +604,29 @@ function Screen1Selection() {
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-6">
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Fijación y limpieza FTTH</span>
-                <h2 className="mt-1 text-2xl md:text-3xl font-bold text-brand-ink font-heading">Productos estrella</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-brand-ink font-heading">Productos estrella</h2>
+                <p className="mt-1 text-sm text-gray-500">Fijación y limpieza para instalaciones FTTH.</p>
               </div>
-              <button onClick={() => goCatalog()} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-600">
-                Explorar todo el catálogo <ChevronRight className="w-4 h-4" />
-              </button>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {estrella.map(p => (
                 <button
                   key={p.sku}
                   onClick={() => goCatalog({ q: p.sku })}
-                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-lg overflow-hidden shadow-sm hover:shadow-sm transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 >
-                  <div className="w-full h-36 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">
+                  <div className="w-full h-40 bg-gray-50 border-b border-gray-100 overflow-hidden flex items-center justify-center">
                     {p.imagen_url
-                      ? <img src={p.imagen_url} alt={p.nombre} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                      ? <img src={p.imagen_url} alt={p.nombre} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply" />
                       : <LayoutGrid className="w-10 h-10 text-gray-300" />}
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-brand-ink font-heading leading-snug">{p.nombre}</h3>
-                  <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">{p.descripcion}</p>
-                  <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
-                    Ver producto <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                  <div className="p-4 flex-1 flex flex-col">
+                    <span className="text-[11px] font-medium text-gray-400 tabular-nums">{p.sku}</span>
+                    <h3 className="mt-0.5 text-base font-semibold text-brand-ink font-heading leading-snug">{p.nombre}</h3>
+                    <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1">{p.descripcion}</p>
+                    <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      Ver producto <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
                 </button>
               ))}
@@ -650,11 +641,10 @@ function Screen1Selection() {
           <div className="max-w-6xl mx-auto">
             <div className="flex items-end justify-between gap-4 mb-6">
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Líneas de producto</span>
-                <h2 className="mt-1 text-2xl md:text-3xl font-bold text-brand-ink font-heading">Categorías principales</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-brand-ink font-heading">Categorías principales</h2>
               </div>
               <button onClick={() => goCatalog()} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:text-teal-600">
-                Explorar todo el catálogo <ChevronRight className="w-4 h-4" />
+                Ver todo el catálogo <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -662,25 +652,27 @@ function Screen1Selection() {
                 <button
                   key={l.name}
                   onClick={() => goCatalog({ cat: l.name })}
-                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-2xl p-4 shadow-sm hover:shadow-lg hover:shadow-teal-900/5 transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                  className="group text-left bg-white border border-gray-200/80 hover:border-teal-500/60 rounded-lg overflow-hidden shadow-sm hover:shadow-sm transition-all duration-200 flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                 >
-                  <div className="relative w-full h-36 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden flex items-center justify-center">
+                  <div className="relative w-full h-40 bg-gray-50 border-b border-gray-100 overflow-hidden flex items-center justify-center">
                     {l.image
-                      ? <img src={l.image} alt={l.name} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply group-hover:scale-105 transition-transform duration-300" />
+                      ? <img src={l.image} alt={l.name} loading="lazy" className="w-full h-full object-contain p-3 mix-blend-multiply" />
                       : <LayoutGrid className="w-10 h-10 text-gray-300" />}
                     {l.inStock !== null && (
-                      <span className={`absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${l.inStock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
+                      <span className={`absolute top-2 right-2 inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[11px] font-medium ${l.inStock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-600'}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${l.inStock ? 'bg-teal-600' : 'bg-gray-400'}`} />
                         {l.inStock ? 'Disponible' : 'No disponible'}
                       </span>
                     )}
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-brand-ink font-heading">{l.name}</h3>
-                  <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
-                    {l.sub.length ? l.sub.join(', ') : 'Consulta los productos disponibles de esta línea.'}
-                  </p>
-                  <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
-                    Ver equipos <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                  <div className="p-4 flex-1 flex flex-col">
+                    <h3 className="text-base font-semibold text-brand-ink font-heading">{l.name}</h3>
+                    <p className="mt-2 text-xs text-gray-500 leading-relaxed line-clamp-2 flex-1">
+                      {l.sub.length ? l.sub.join(', ') : 'Consulta los productos disponibles de esta línea.'}
+                    </p>
+                    <div className="w-full mt-4 flex items-center justify-between text-xs font-semibold text-teal-700">
+                      Ver equipos <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
+                    </div>
                   </div>
                 </button>
               ))}
@@ -689,20 +681,47 @@ function Screen1Selection() {
         </section>
       )}
 
-      {/* BENEFICIOS */}
+      {/* CONTACTO: para lo que no está en el catálogo, con el mapa de la tienda */}
       <section className="px-4 sm:px-6 pb-16">
-        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {perks.map(p => (
-            <div key={p.title} className="flex items-center gap-3 bg-white rounded-xl border border-gray-200/80 px-4 py-3.5">
-              <div className="w-9 h-9 shrink-0 rounded-lg bg-teal-50 flex items-center justify-center">
-                <p.icon className="w-4 h-4 text-teal-700" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-brand-ink">{p.title}</p>
-                <p className="text-xs text-gray-500">{p.desc}</p>
-              </div>
+        <div className="max-w-6xl mx-auto bg-white rounded-lg border border-gray-200/80 overflow-hidden grid md:grid-cols-2">
+          <div className="p-6 md:p-8 flex flex-col">
+            <h2 className="text-xl font-semibold text-brand-ink font-heading">¿No encuentras lo que buscas?</h2>
+            <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+              Mándanos el modelo, la medida o una foto de lo que necesitas y un asesor te responde con disponibilidad y precio. También puedes pasar a la tienda.
+            </p>
+            <a
+              href="https://maps.app.goo.gl/k84HifViNSYAn8LMA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-start gap-1.5 text-sm text-gray-600 hover:text-teal-700 transition-colors"
+            >
+              <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-teal-700" />
+              <span>Donizetti 217, Col. Vallejo, CDMX · <span className="font-semibold text-teal-700">Cómo llegar</span></span>
+            </a>
+            <div className="mt-6 md:mt-auto pt-0 md:pt-6 flex flex-col sm:flex-row gap-3">
+              <a
+                href="https://wa.me/525581880459?text=Hola%2C%20busco%20un%20producto%20que%20no%20encontr%C3%A9%20en%20el%20cat%C3%A1logo."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-teal-600 hover:bg-teal-700 px-5 py-3 text-sm font-semibold text-white transition-colors"
+              >
+                <WhatsAppIcon className="w-4 h-4" /> Escribir por WhatsApp
+              </a>
+              <a
+                href="tel:+525581880459"
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 hover:border-teal-500/60 px-5 py-3 text-sm font-semibold text-brand-ink transition-colors"
+              >
+                <Phone className="w-4 h-4 text-teal-700" /> +52 55 8188 0459
+              </a>
             </div>
-          ))}
+          </div>
+          <iframe
+            title="Ubicación de la tienda EEPSA en Google Maps"
+            src="https://www.google.com/maps?q=Donizetti+217,+Vallejo,+Gustavo+A.+Madero,+Ciudad+de+M%C3%A9xico&z=16&output=embed"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full h-64 md:h-full min-h-[16rem] border-0 border-t md:border-t-0 md:border-l border-gray-200/80"
+          />
         </div>
       </section>
     </motion.div>
@@ -823,7 +842,7 @@ function Screen2AAssistant() {
   return (
     <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 flex flex-col items-center sm:py-6 sm:px-4 bg-gray-50">
       <div className="flex w-full max-w-6xl gap-6">
-      <div className="relative flex h-[calc(100vh-4rem)] w-full min-w-0 flex-1 flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-gray-200 premium-shadow overflow-hidden">
+      <div className="relative flex h-[calc(100vh-4rem)] w-full min-w-0 flex-1 flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-lg sm:border sm:border-gray-200 premium-shadow overflow-hidden">
         <div className="p-3 bg-white/95 backdrop-blur-md border-b border-gray-100 z-20 flex items-center gap-3 shadow-sm">
            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-500 hover:text-teal-700 transition-colors p-1.5 rounded-full ml-1">
              <ArrowLeft className="w-5 h-5" />
@@ -872,7 +891,7 @@ function Screen2AAssistant() {
                           : 'bg-white text-brand-ink rounded-[1.2rem] rounded-tl-[4px] border border-gray-100'}`}
                       >
                         {msg.productImage && (
-                          <div className="w-full sm:min-w-[200px] h-28 sm:h-32 bg-gray-50/80 rounded-xl mb-2 overflow-hidden flex items-center justify-center p-2 border border-gray-100/50">
+                          <div className="w-full sm:min-w-[200px] h-28 sm:h-32 bg-gray-50/80 rounded-md mb-2 overflow-hidden flex items-center justify-center p-2 border border-gray-100/50">
                              <img src={msg.productImage} className="h-full object-contain mix-blend-multiply" alt="Producto agregado" />
                           </div>
                         )}
@@ -905,17 +924,17 @@ function Screen2AAssistant() {
                               <motion.div 
                                 key={p.id} 
                                 initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: pIdx * 0.1 }}
-                                className="snap-center shrink-0 w-[80%] sm:w-[calc(33.333%-0.75rem)] bg-white rounded-[1.25rem] border border-gray-100 overflow-hidden premium-shadow flex flex-col group/card"
+                                className="snap-center shrink-0 w-[80%] sm:w-[calc(33.333%-0.75rem)] bg-white rounded-lg border border-gray-100 overflow-hidden premium-shadow flex flex-col group/card"
                               >
                                  <div 
                                    onClick={() => setSelectedProduct(p)} 
                                    className="cursor-pointer flex-1 flex flex-col group/inner relative"
                                  >
-                                   <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-[1.25rem]" />
-                                   <div className="h-28 sm:h-32 bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden shrink-0">
-                                      {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
+                                                                      <div className="h-28 sm:h-32 bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden shrink-0">
+                                      {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="h-full object-contain mix-blend-multiply" /> : <Grid className="text-gray-300 w-10 h-10" />}
                                    </div>
                                    <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                                      <span className="mb-0.5 text-[10px] font-medium text-gray-400 tabular-nums">{p.sku}</span>
                                       <h3 className="font-bold font-heading text-brand-ink text-[13px] sm:text-[14px] mb-1 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
                                       <p className="text-[11px] sm:text-[12px] font-medium text-gray-400 mb-2 line-clamp-2 leading-snug">{p.descripcion}</p>
                                    </div>
@@ -966,7 +985,7 @@ function Screen2AAssistant() {
                       whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
                       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + (idx * 0.03) }}
                       onClick={() => handleCategoryClick(cat)} 
-                      className="rounded-xl border-2 border-teal-500 bg-teal-50 px-4 py-2.5 text-[14px] sm:text-[15px] font-bold text-teal-800 hover:bg-teal-500 hover:text-white transition-all shadow-md"
+                      className="rounded-md border-2 border-teal-500 bg-teal-50 px-4 py-2.5 text-[14px] sm:text-[15px] font-bold text-teal-800 hover:bg-teal-500 hover:text-white transition-all shadow-md"
                     >
                       {cat}
                     </motion.button>
@@ -985,7 +1004,7 @@ function Screen2AAssistant() {
       </div>
 
       {/* Panel lateral: lo que el usuario va seleccionando en el chat */}
-      <aside className="hidden lg:flex w-80 shrink-0 flex-col sm:h-[calc(100vh-8rem)] sm:max-h-[900px] bg-white border border-gray-200 rounded-[2rem] overflow-hidden">
+      <aside className="hidden lg:flex w-80 shrink-0 flex-col sm:h-[calc(100vh-8rem)] sm:max-h-[900px] bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="text-base font-semibold text-brand-ink font-heading">Tu selección</h2>
           <p className="text-xs text-gray-500 mt-0.5">Se actualiza conforme avanzas con Nexi.</p>
@@ -999,7 +1018,7 @@ function Screen2AAssistant() {
             ) : (
               <ul className="flex flex-col gap-2">
                 {cart.map(item => (
-                  <li key={item.id} className="flex items-center gap-3 rounded-xl border border-gray-100 p-2">
+                  <li key={item.id} className="flex items-center gap-3 rounded-md border border-gray-100 p-2">
                     <div className="w-12 h-12 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden">
                       {item.imagen_url ? <img src={item.imagen_url} alt="" className="w-full h-full object-contain p-1 mix-blend-multiply" /> : <Grid className="w-5 h-5 text-gray-300" />}
                     </div>
@@ -1027,7 +1046,7 @@ function Screen2AAssistant() {
 
         {cart.length > 0 && (
           <div className="px-5 py-4 border-t border-gray-100">
-            <button onClick={() => setIsCartOpen(true)} className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-3 transition-colors">
+            <button onClick={() => setIsCartOpen(true)} className="w-full rounded-md bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold py-3 transition-colors">
               Ver cotización
             </button>
           </div>
@@ -1096,12 +1115,12 @@ function Screen2BCatalog() {
             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-gray-50 p-2 rounded-full">
                <ArrowLeft className="w-5 h-5" />
             </motion.button>
-            <h1 className="text-xl font-black font-heading text-brand-ink hidden sm:block tracking-tight">Catálogo</h1>
+            <h1 className="text-xl font-bold font-heading text-brand-ink hidden sm:block tracking-tight">Catálogo</h1>
             <div className="relative flex-1 max-w-lg">
                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                <input 
                  type="text" 
-                 placeholder="Buscar por nombre o descripción..." 
+                 placeholder="Buscar por nombre, SKU o descripción..." 
                  value={search}
                  onChange={e => setSearch(e.target.value)}
                  className="w-full pl-11 pr-5 py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-4 focus:ring-teal-500/20 bg-gray-50 focus:bg-white text-sm font-medium transition-all"
@@ -1114,7 +1133,7 @@ function Screen2BCatalog() {
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 flex flex-col md:flex-row gap-6 lg:gap-8">
          {/* Sidebar Categorías */}
          <aside className="w-full md:w-64 shrink-0">
-           <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sticky top-[150px]">
+           <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm sticky top-[150px]">
               <ul className="space-y-1">
                 {catalogCategories.map(cat => (
                   <li key={cat.name} className="flex flex-col">
@@ -1133,7 +1152,7 @@ function Screen2BCatalog() {
                           }
                         }
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-colors ${selectedCategory === cat.name ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-md font-bold text-sm transition-colors ${selectedCategory === cat.name ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'}`}
                     >
                       {cat.name}
                       {cat.sub.length > 0 && (
@@ -1172,12 +1191,12 @@ function Screen2BCatalog() {
          {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                <div key={i} className="bg-white rounded-3xl border border-gray-100 p-5 h-[340px] animate-pulse">
-                  <div className="h-40 bg-gray-100 rounded-2xl mb-5 w-full"></div>
+                <div key={i} className="bg-white rounded-lg border border-gray-100 p-5 h-[340px] animate-pulse">
+                  <div className="h-40 bg-gray-100 rounded-lg mb-5 w-full"></div>
                   <div className="h-4 bg-gray-100 rounded-full w-3/4 mb-3"></div>
                   <div className="h-3 bg-gray-100 rounded-full w-full mb-2"></div>
                   <div className="h-3 bg-gray-100 rounded-full w-4/5 mb-6"></div>
-                  <div className="h-12 bg-gray-100 rounded-2xl w-full mt-auto"></div>
+                  <div className="h-12 bg-gray-100 rounded-lg w-full mt-auto"></div>
                 </div>
               ))}
             </div>
@@ -1199,21 +1218,22 @@ function Screen2BCatalog() {
                   {filtered.map((p) => (
                      <div 
                         key={p.id} 
-                        className="bg-white rounded-3xl border border-gray-100 premium-shadow hover:shadow-[0_20px_40px_-15px_rgba(15,118,110,0.15)] transition-all duration-300 overflow-hidden flex flex-col group"
+                        className="bg-white rounded-lg border border-gray-100 premium-shadow hover:border-gray-300 transition-all duration-300 overflow-hidden flex flex-col group"
                      >
                         <div 
                            onClick={() => setSelectedProduct(p)}
                            className="cursor-pointer flex-1 flex flex-col group/inner relative"
                         >
-                           <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-3xl" />
-                           <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden shrink-0">
-                              {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="w-12 h-12 text-gray-200" />}
+                                                      <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden shrink-0">
+                              {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply" /> : <Grid className="w-12 h-12 text-gray-200" />}
                            </div>
                            <div className="p-6 flex-1 flex flex-col pb-0">
-                              <h3 className="font-bold font-heading text-brand-ink mb-2 text-[17px] leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
+                              <span className="mb-1 text-[11px] font-medium text-gray-400 tabular-nums">{p.sku}</span>
+                              <h3 className="font-semibold font-heading text-brand-ink mb-2 text-[15px] leading-snug line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
                               <p className="text-[13px] font-medium text-gray-400 mb-3 line-clamp-2">{p.descripcion}</p>
                               {p.en_stock !== undefined && (
-                                <span className={`self-start mb-2 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${p.en_stock ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+                                <span className={`self-start mb-2 inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[11px] font-medium ${p.en_stock ? 'bg-teal-50 border-teal-100 text-teal-700' : 'bg-gray-100 border-gray-200 text-gray-600'}`}>
+                                  <span className={`w-1.5 h-1.5 rounded-full ${p.en_stock ? 'bg-teal-600' : 'bg-gray-400'}`} />
                                   {p.en_stock ? 'En existencia' : 'Sobre pedido'}
                                 </span>
                               )}
@@ -1222,16 +1242,12 @@ function Screen2BCatalog() {
 
                         <div className="p-6 pt-4 mt-auto flex flex-col gap-4 relative z-20">
 
-                           <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Añadir a Cotización</span>
-                              <motion.button 
-                                whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
-                                onClick={() => addToCart(p)} 
-                                className="bg-brand-ink text-white p-3.5 rounded-2xl shadow-lg shadow-black/10 hover:bg-teal-700 transition-colors"
-                              >
-                                 <Plus className="w-5 h-5" />
-                              </motion.button>
-                           </div>
+                           <button
+                              onClick={() => addToCart(p)}
+                              className="w-full flex items-center justify-center gap-1.5 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-700 py-2.5 text-sm font-semibold transition-colors"
+                           >
+                              <Plus className="w-4 h-4" /> Agregar
+                           </button>
                         </div>
                      </div>
                   ))}
@@ -1299,10 +1315,10 @@ function GlobalFooter() {
                 DONIZETTI 217 COL. VALLEJO, Ciudad de México, México
               </p>
             </a>
-            <a href="https://wa.me/525543241575" target="_blank" rel="noopener noreferrer" aria-label="Contactar a EEPSA por WhatsApp" className="group">
+            <a href="https://wa.me/525581880459" target="_blank" rel="noopener noreferrer" aria-label="Contactar a EEPSA por WhatsApp" className="group">
               <p className="mb-2.5 flex items-start gap-2.5 text-[0.88rem] text-white/65 transition-colors group-hover:text-[#1a5952]">
                 <WhatsAppIcon className="mt-0.5 h-4 w-4 shrink-0 fill-[#1a5952]" />
-                (52) 5543241575
+                +52 55 8188 0459
               </p>
             </a>
           </div>
