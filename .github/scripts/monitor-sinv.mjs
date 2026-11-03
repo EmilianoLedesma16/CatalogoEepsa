@@ -60,7 +60,9 @@ function diff(sinvItems, catalogo) {
     const c = bySku.get(s.sku.toUpperCase());
     if (!c) out.push(`${s.sku}: está en el SINV y no en el catálogo`);
     else {
-      if (Number(c.precio_estimado) !== Number(s.price)) out.push(`${s.sku}: precio SINV ${s.price} vs catálogo ${c.precio_estimado}`);
+      // Desde el PR #5 el catálogo público no muestra precios (los confirma un asesor en la cotización):
+      // no se comparan contra el SINV; sólo se vigila que ninguno se filtre al público.
+      if (c.precio_estimado != null) out.push(`${s.sku}: el catálogo público muestra precio ${c.precio_estimado} (debería ir sin precio)`);
       if (c.disponible !== s.available) out.push(`${s.sku}: stock SINV ${s.available} vs catálogo ${c.disponible}`);
       if (c.en_stock !== s.inStock) out.push(`${s.sku}: en existencia SINV ${s.inStock} vs catálogo ${c.en_stock}`);
       bySku.delete(s.sku.toUpperCase());
@@ -98,7 +100,7 @@ await check('Catálogo conectado al SINV y sin cola (/api/health)', async () => 
   assert(sinv === true, 'el catálogo no logra hablar con el SINV');
   assert(colaPendiente === 0, `${colaPendiente} cotizaciones esperando en cola_sinv`);
 });
-await check('Productos, precios y stock iguales en los dos lados', async () => {
+await check('Productos y stock iguales en los dos lados (catálogo sin precios)', async () => {
   assert(sinvItems.length, 'no se pudo leer el catálogo del SINV');
   let d = [];
   // El catálogo cachea 5 s: si alguien movió stock justo ahora, el segundo intento ya coincide
